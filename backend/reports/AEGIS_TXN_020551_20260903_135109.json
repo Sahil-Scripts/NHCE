@@ -1,0 +1,126 @@
+{
+  "aegis_version": "1.0.0",
+  "report_id": "AEGIS_TXN_020551_20260903_135109",
+  "generated_at": "2026-09-03T13:51:09.585851",
+  "transaction": {
+    "txn_id": "TXN_020551",
+    "sender_id": "ACC_0156",
+    "receiver_id": "ACC_0285",
+    "amount_inr": 196947.09,
+    "timestamp": "2025-02-02 14:44:34.000000"
+  },
+  "decision": {
+    "outcome": "BLOCK",
+    "p_fraud": 0.958,
+    "confidence_pct": 95.8,
+    "threshold_used": 0.85,
+    "reason": "P(fraud|evidence) = 0.958 exceeds decision boundary \u03b8=0.85. Detected 0 anomaly signal(s): ."
+  },
+  "investigation": {
+    "total_evidence_sources": 1,
+    "sources_queried": [
+      "watchlist_lookup"
+    ],
+    "belief_updates": 1,
+    "p_fraud_initial": 0.8353,
+    "p_fraud_final": 0.958,
+    "belief_history": [
+      {
+        "step": 0,
+        "evidence": "XGBoost_prior",
+        "likelihood_ratio": 1.0,
+        "p_fraud": 0.8352571725845337
+      },
+      {
+        "step": 1,
+        "evidence": "receiver_is_shell",
+        "likelihood_ratio": 4.5,
+        "p_fraud_before": 0.8353,
+        "p_fraud_after": 0.958,
+        "delta": 0.1228
+      }
+    ],
+    "query_log": [
+      {
+        "step": 1,
+        "source": "watchlist_lookup",
+        "description": "Check sender/receiver against PEP/OFAC/RBI watchlists",
+        "result_summary": "Sender watchlisted=False | Receiver watchlisted=False",
+        "p_fraud_after": 0.958
+      }
+    ]
+  },
+  "evidence": {
+    "anomalies_detected": [],
+    "anomaly_count": 0,
+    "graph": {
+      "is_circular": null,
+      "circular_length": null,
+      "ring_members": [],
+      "shell_chain_length": null,
+      "shell_chain_path": [],
+      "reachable_accounts": null,
+      "reachable_watchlisted": null,
+      "total_flow_amount_inr": null,
+      "graph_risk_score": null
+    },
+    "temporal": {
+      "velocity_burst": null,
+      "velocity_burst_count": null,
+      "dormant_reactivation": null,
+      "dormancy_days": null,
+      "round_trip_detected": null,
+      "round_trip_hours": null,
+      "threshold_split_pattern": null,
+      "temporal_risk_score": null
+    },
+    "xgboost": {
+      "risk_prior": 0.8352571725845337,
+      "raw_score": 1.6233543157577515,
+      "top_features": [
+        {
+          "feature": "is_weekend",
+          "importance": 0.050763532519340515
+        },
+        {
+          "feature": "velocity_1h",
+          "importance": 0.04120772331953049
+        },
+        {
+          "feature": "is_sender_shell",
+          "importance": 0.03657340258359909
+        },
+        {
+          "feature": "below_threshold",
+          "importance": 0.033667974174022675
+        },
+        {
+          "feature": "receiver_in_amt_24h",
+          "importance": 0.03238147869706154
+        }
+      ]
+    }
+  },
+  "compliance": {
+    "str_type": "AUTOMATED_STR",
+    "reporting_entity": "AEGIS_AUTONOMOUS_AML_SYSTEM",
+    "str_date": "2026-09-03",
+    "str_time": "13:51:09",
+    "subject_account": "ACC_0156",
+    "beneficiary_account": "ACC_0285",
+    "transaction_amount": 196947.09,
+    "currency": "INR",
+    "fraud_probability": 0.958,
+    "suspicion_grounds": [],
+    "regulatory_framework": [
+      "PMLA_2002",
+      "RBI_KYC_MASTER",
+      "FATF_R16",
+      "FIU_IND_STR"
+    ],
+    "fiu_ind_compliance": true,
+    "fatf_aml_compliant": true,
+    "audit_trail_complete": true,
+    "recommendation": "FREEZE_ACCOUNT_PENDING_INVESTIGATION"
+  }
+}

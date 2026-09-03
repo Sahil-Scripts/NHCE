@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS — Master Presentation Deck & Demo Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#03060f;--panel:#070e1e;--panel2:#090f1f;
+  --edge:rgba(0,229,255,.1);--edge2:rgba(0,229,255,.25);
+  --cyan:#00e5ff;--cyan2:#00bcd4;
+  --purple:#a855f7;--purple2:#7c3aed;
+  --teal:#14b8a6;--amber:#f59e0b;--green:#22c55e;--red:#ef4444;
+  --txt:#dde8f8;--txt2:#7a9bc0;--txt3:#3a5570;
+  --r:12px;
+}
+body{
+  background:var(--bg);
+  font-family:'Space Grotesk',sans-serif;
+  color:var(--txt);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:30px 20px;
+}
+.bg-glow{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 55% 45% at 20% 40%,rgba(0,229,255,.07) 0%,transparent 65%),
+    radial-gradient(ellipse 45% 35% at 80% 60%,rgba(168,85,247,.07) 0%,transparent 65%);
+}
+.container{
+  position:relative;z-index:2;
+  max-width:1050px;width:100%;
+  display:flex;flex-direction:column;gap:24px;
+}
+.header{
+  text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.logo-hex{
+  width:48px;height:48px;
+  background:linear-gradient(135deg,var(--cyan),var(--purple2));
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#fff;
+  box-shadow:0 0 25px rgba(0,229,255,.6);
+}
+.title{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:36px;letter-spacing:.05em;
+  background:linear-gradient(90deg,var(--cyan),#60a5fa,var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.subtitle{
+  font-size:13px;color:var(--txt2);max-width:650px;line-height:1.6;
+}
+.deck-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;
+}
+.card{
+  background:var(--panel);border:1px solid var(--edge);border-radius:var(--r);
+  padding:20px;display:flex;flex-direction:column;gap:12px;
+  text-decoration:none;color:inherit;position:relative;overflow:hidden;
+  transition:all .25s ease;
+}
+.card:hover{
+  border-color:var(--cyan);transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,229,255,.15);
+}
+.card-num{
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--cyan2);
+  letter-spacing:.15em;text-transform:uppercase;
+}
+.card-title{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:17px;
+}
+.card-desc{
+  font-size:11.5px;color:var(--txt2);line-height:1.5;flex:1;
+}
+.card-btn{
+  font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--cyan);display:flex;align-items:center;gap:6px;margin-top:4px;
+}
+.cli-box{
+  background:var(--panel2);border:1px solid var(--edge);border-radius:var(--r);padding:18px 22px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.cli-header{
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cli-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em;
+}
+.cli-code{
+  background:#02050d;padding:12px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan);border:1px solid rgba(255,255,255,.05);
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="container">
+  <div class="header">
+    <div class="logo-hex">Æ</div>
+    <h1 class="title">AEGIS SUITE</h1>
+    <p class="subtitle">Autonomous Financial Crime Investigation & AML Reasoning Pipeline. Replace static rule engines with entropy-guided Bayesian network traversal.</p>
+  </div>
+
+  <div class="deck-grid">
+    <a href="Presentation/problem-statement.html" class="card">
+      <div class="card-num">Slide 01</div>
+      <div class="card-title" style="color:var(--red);">Problem Statement</div>
+      <div class="card-desc">Why legacy rule systems fail: shell company layering, threshold splitting, and 60% false positive rates.</div>
+      <div class="card-btn" style="color:var(--red);">Launch Slide 1 →</div>
+    </a>
+
+    <a href="Presentation/solution.html" class="card">
+      <div class="card-num">Slide 02</div>
+      <div class="card-title" style="color:var(--cyan);">AEGIS Solution</div>
+      <div class="card-desc">The 4-layer autonomous architecture: Ingestion, Detection, Investigation loop, and Compliance Output.</div>
+      <div class="card-btn">Launch Slide 2 →</div>
+    </a>
+
+    <a href="Presentation/aegis_technical_approach.html" class="card">
+      <div class="card-num">Slide 03</div>
+      <div class="card-title" style="color:var(--purple);">Technical Approach</div>
+      <div class="card-desc">Deep-dive into Stage A→E: Shannon entropy confidence, InfoGain planner, and Bayesian belief updates.</div>
+      <div class="card-btn" style="color:var(--purple);">Launch Slide 3 →</div>
+    </a>
+
+    <a href="http://localhost:8080" target="_blank" class="card" style="border-color:rgba(0,229,255,.3);background:linear-gradient(180deg,var(--panel),rgba(0,229,255,.04));">
+      <div class="card-num" style="color:var(--green);">Frontend App · FIU India</div>
+      <div class="card-title" style="color:var(--green);">Transaction Flow Analysis</div>
+      <div class="card-desc">Interactive money flow visualizer: circular loops, dormant accounts, center cards, and multi-bank statements.</div>
+      <div class="card-btn" style="color:var(--green);font-weight:700;">Open Frontend (localhost:8080) ★ →</div>
+    </a>
+  </div>
+
+  <div class="cli-box">
+    <div class="cli-header">
+      <div class="cli-title">⚡ CLI Engine Quick Commands</div>
+    </div>
+    <div class="cli-code">
+      python backend/investigate.py --demo &nbsp;&nbsp;&nbsp;# Run interactive CLI cases<br>
+      python backend/demo/run_demo.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Run full batch stream demo
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS — Technical Approach</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#03060f;--bg2:#050c1a;--panel:#070e1e;--panel2:#090f1f;
+  --edge:rgba(0,229,255,.08);--edge2:rgba(0,229,255,.2);
+  --cyan:#00e5ff;--cyan2:#00bcd4;
+  --purple:#a855f7;--purple2:#7c3aed;
+  --teal:#14b8a6;
+  --amber:#f59e0b;
+  --green:#22c55e;
+  --red:#ef4444;
+  --txt:#dde8f8;--txt2:#7a9bc0;--txt3:#3a5570;
+  --r:10px;--r2:13px;
+}
+html,body{width:100vw;min-height:100vh;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt);}
+
+/* ── BACKGROUND ── */
+#bgcanvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.bg-glow{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 55% 45% at 12% 50%,rgba(0,229,255,.06) 0%,transparent 65%),
+    radial-gradient(ellipse 45% 38% at 88% 28%,rgba(168,85,247,.06) 0%,transparent 65%),
+    radial-gradient(ellipse 38% 28% at 52% 88%,rgba(20,184,166,.04) 0%,transparent 65%);
+  animation:glowShift 8s ease-in-out infinite alternate;
+}
+@keyframes glowShift{0%{opacity:.8;}100%{opacity:1;}}
+.scanlines{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,.005) 2px,rgba(0,229,255,.005) 4px);
+  animation:scanMove 4s linear infinite;
+}
+@keyframes scanMove{0%{background-position:0 0;}100%{background-position:0 40px;}}
+
+/* ── SHELL ── */
+.shell{position:relative;z-index:2;width:100vw;min-height:100vh;display:flex;flex-direction:column;padding:11px 18px 16px;gap:8px;}
+
+/* ── ENTRY ANIMATIONS ── */
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeSlideLeft{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeSlideRight{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+.anim-up   {opacity:0;animation:fadeSlideUp   .6s cubic-bezier(.22,1,.36,1) forwards;}
+.anim-left {opacity:0;animation:fadeSlideLeft  .6s cubic-bezier(.22,1,.36,1) forwards;}
+.anim-right{opacity:0;animation:fadeSlideRight .6s cubic-bezier(.22,1,.36,1) forwards;}
+.anim-scale{opacity:0;animation:scaleIn        .6s cubic-bezier(.22,1,.36,1) forwards;}
+.d0{animation-delay:.05s;}.d1{animation-delay:.15s;}.d2{animation-delay:.25s;}
+.d3{animation-delay:.35s;}.d4{animation-delay:.45s;}.d5{animation-delay:.55s;}
+.d6{animation-delay:.65s;}.d7{animation-delay:.75s;}
+
+/* ── TOP BAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.tb-left{display:flex;align-items:center;gap:16px;}
+.logo-mark{display:flex;align-items:center;gap:10px;}
+.logo-hex{
+  width:34px;height:34px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--cyan),var(--purple2));
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:#fff;
+  animation:hexPulse 2.8s ease-in-out infinite;
+}
+@keyframes hexPulse{
+  0%,100%{filter:drop-shadow(0 0 5px rgba(0,229,255,.5));}
+  50%{filter:drop-shadow(0 0 16px rgba(0,229,255,1)) drop-shadow(0 0 8px rgba(168,85,247,.6));}
+}
+.logo-text{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:21px;letter-spacing:.08em;
+  background:linear-gradient(90deg,var(--cyan),#60a5fa,var(--purple));background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:gradShift 4s linear infinite;
+}
+@keyframes gradShift{0%{background-position:0% center;}100%{background-position:200% center;}}
+.logo-sub{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--txt3);text-transform:uppercase;margin-top:-4px;}
+.slide-tag{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;color:var(--cyan2);text-transform:uppercase;
+  padding:4px 11px;border:1px solid rgba(0,229,255,.22);border-radius:20px;background:rgba(0,229,255,.04);
+  animation:tagBreathe 3s ease-in-out infinite;
+}
+@keyframes tagBreathe{0%,100%{border-color:rgba(0,229,255,.22);}50%{border-color:rgba(0,229,255,.5);}}
+.tb-center{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;letter-spacing:.02em;display:flex;align-items:center;gap:8px;}
+.tb-center .hi{background:linear-gradient(90deg,var(--cyan),var(--purple));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradShift 5s linear infinite;}
+.tb-right{display:flex;align-items:center;gap:9px;}
+.status-pill{
+  display:flex;align-items:center;gap:6px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--green);
+  background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);padding:4px 11px;border-radius:20px;text-transform:uppercase;
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px var(--green);}50%{opacity:.2;box-shadow:none;}}
+.round-badge{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#fff;
+  background:linear-gradient(135deg,var(--purple2),var(--purple));
+  padding:4px 13px;border-radius:20px;text-transform:uppercase;
+  animation:badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 10px rgba(168,85,247,.35);}50%{box-shadow:0 0 22px rgba(168,85,247,.65);}}
+
+/* ── HERO ── */
+.hero{
+  flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;
+  background:linear-gradient(135deg,rgba(0,229,255,.03),rgba(168,85,247,.03));
+  border:1px solid rgba(0,229,255,.13);border-radius:var(--r2);
+  position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--cyan),var(--purple));border-radius:1px;}
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(0,229,255,.04) 50%,transparent 70%);
+  background-size:200% 100%;animation:shineSweep 4s ease-in-out infinite;pointer-events:none;
+}
+@keyframes shineSweep{0%,100%{background-position:-100% 0;}50%{background-position:200% 0;}}
+.hero-kicker{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;color:var(--cyan2);text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+.hero-kicker::before{content:'▶';font-size:6px;animation:blink 1.8s ease infinite;}
+.hero-h{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;line-height:1.2;letter-spacing:-.01em;}
+.hero-h .hi{background:linear-gradient(90deg,var(--cyan),#60a5fa);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradShift 4s linear infinite;}
+.hero-sub{font-size:10.5px;color:var(--txt2);margin-top:4px;max-width:640px;line-height:1.55;}
+.hero-stats{display:flex;gap:18px;}
+.hs{text-align:center;position:relative;}
+.hs::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:28px;height:2px;border-radius:1px;animation:statLine 2s ease-in-out infinite alternate;}
+.hs:nth-child(1)::after{background:var(--cyan);}
+.hs:nth-child(2)::after{background:var(--purple);}
+.hs:nth-child(3)::after{background:var(--green);}
+@keyframes statLine{0%{width:14px;opacity:.4;}100%{width:32px;opacity:1;}}
+.hs-val{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;line-height:1;margin-bottom:2px;}
+.hs-val.c{color:var(--cyan);text-shadow:0 0 18px rgba(0,229,255,.5);}
+.hs-val.p{color:var(--purple);text-shadow:0 0 18px rgba(168,85,247,.5);}
+.hs-val.g{color:var(--green);text-shadow:0 0 18px rgba(34,197,94,.5);}
+.hs-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--txt3);text-transform:uppercase;}
+
+/* ── TICKER ── */
+.ticker-wrap{overflow:hidden;flex-shrink:0;border-top:1px solid var(--edge);border-bottom:1px solid var(--edge);background:rgba(0,229,255,.02);padding:3px 0;}
+.ticker{display:flex;gap:0;animation:tickerScroll 28s linear infinite;white-space:nowrap;}
+.ticker-item{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;color:var(--txt3);padding:0 28px;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.ticker-item span{color:var(--cyan2);}
+.ticker-sep{color:var(--txt3);opacity:.3;}
+@keyframes tickerScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+/* ── MAIN GRID ── */
+.main{display:grid;grid-template-columns:1fr 1.45fr 1fr;gap:9px;flex:1;}
+
+/* ── PANEL ── */
+.panel{
+  background:var(--panel);border:1px solid var(--edge);border-radius:var(--r2);
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+  transition:border-color .3s;
+}
+.panel:hover{border-color:var(--edge2);}
+.panel::before{content:'';position:absolute;top:0;right:0;width:40px;height:40px;background:radial-gradient(circle at 100% 0%,rgba(0,229,255,.07),transparent 70%);pointer-events:none;}
+.panel-hd{padding:9px 13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--edge);flex-shrink:0;position:relative;overflow:hidden;}
+.panel-hd::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.02),transparent);background-size:200% 100%;animation:hdShimmer 3s ease-in-out infinite;pointer-events:none;}
+@keyframes hdShimmer{0%,100%{background-position:-100% 0;}50%{background-position:200% 0;}}
+.phi{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.phi-c{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);}
+.phi-p{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);}
+.phi-t{background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.25);}
+.phi-a{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);}
+.phi-g{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);}
+.phi-r{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);}
+.phd{font-family:'Syne',sans-serif;font-weight:700;font-size:11.5px;}
+.phd-s{font-family:'JetBrains Mono',monospace;font-size:8.5px;margin-top:1px;}
+.c{color:var(--cyan);}.p{color:var(--purple);}.t{color:var(--teal);}
+.a{color:var(--amber);}.g{color:var(--green);}.r{color:var(--red);}.s{color:var(--txt2);}
+.panel-bd{padding:10px;flex:1;display:flex;flex-direction:column;gap:7px;overflow:visible;}
+
+/* ── LEFT COL ── */
+.left-col{display:flex;flex-direction:column;gap:9px;}
+
+/* Tech components */
+.tech-item{
+  display:flex;align-items:flex-start;gap:9px;padding:8px 10px 8px 14px;
+  background:var(--panel2);border:1px solid var(--edge);border-radius:var(--r);
+  position:relative;overflow:hidden;transition:border-color .25s,box-shadow .25s,transform .25s;cursor:default;
+}
+.tech-item:hover{transform:translateX(3px);}
+.tech-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:1px;}
+.ti-c::before{background:linear-gradient(180deg,var(--cyan),var(--cyan2));}
+.ti-p::before{background:linear-gradient(180deg,var(--purple),var(--purple2));}
+.ti-t::before{background:linear-gradient(180deg,var(--teal),#0d9488);}
+.ti-a::before{background:linear-gradient(180deg,var(--amber),#d97706);}
+.ti-g::before{background:linear-gradient(180deg,var(--green),#16a34a);}
+.ti-c:hover{box-shadow:0 4px 20px rgba(0,229,255,.1),0 0 0 1px rgba(0,229,255,.15);}
+.ti-p:hover{box-shadow:0 4px 20px rgba(168,85,247,.1),0 0 0 1px rgba(168,85,247,.15);}
+.ti-t:hover{box-shadow:0 4px 20px rgba(20,184,166,.1),0 0 0 1px rgba(20,184,166,.15);}
+.ti-a:hover{box-shadow:0 4px 20px rgba(245,158,11,.1),0 0 0 1px rgba(245,158,11,.15);}
+.ti-g:hover{box-shadow:0 4px 20px rgba(34,197,94,.1),0 0 0 1px rgba(34,197,94,.15);}
+.tech-icon{width:26px;height:26px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.tech-body h4{font-size:11px;font-weight:700;margin-bottom:2px;}
+.tech-body p{font-size:9.5px;color:var(--txt2);line-height:1.5;}
+.tech-tag{display:inline-block;margin-top:3px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:4px;}
+.tag-c{background:rgba(0,229,255,.1);color:var(--cyan2);}
+.tag-p{background:rgba(168,85,247,.1);color:#c084fc;}
+.tag-t{background:rgba(20,184,166,.1);color:var(--teal);}
+.tag-a{background:rgba(245,158,11,.1);color:var(--amber);}
+.tag-g{background:rgba(34,197,94,.1);color:var(--green);}
+
+/* Data flow steps */
+.flow-steps{display:flex;flex-direction:column;gap:0;padding-left:4px;}
+.fstep{
+  display:flex;align-items:center;gap:8px;padding:7px 8px;
+  border-left:2px solid rgba(0,229,255,.12);position:relative;
+  transition:background .2s;border-radius:0 6px 6px 0;
+}
+.fstep:hover{background:rgba(0,229,255,.03);}
+.fstep::before{content:'';position:absolute;left:-5px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;border:2px solid;background:var(--bg);transition:box-shadow .3s;}
+.fstep:hover::before{box-shadow:0 0 12px currentColor;}
+.fs-1::before{border-color:var(--cyan);color:var(--cyan);}
+.fs-2::before{border-color:var(--purple);color:var(--purple);}
+.fs-3::before{border-color:var(--teal);color:var(--teal);}
+.fs-4::before{border-color:var(--amber);color:var(--amber);}
+.fs-5::before{border-color:var(--green);color:var(--green);}
+.fs-6::before{border-color:var(--red);color:var(--red);}
+.fstep-active::before{animation:stagePing 1.5s ease-in-out infinite;}
+@keyframes stagePing{0%,100%{transform:translateY(-50%) scale(1);}50%{transform:translateY(-50%) scale(1.45);}}
+.fstep-num{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;width:52px;flex-shrink:0;}
+.fstep-name{font-size:10px;font-weight:700;flex:1;}
+.fstep-fx{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--txt3);padding:1px 6px;background:rgba(255,255,255,.04);border-radius:4px;border:1px solid rgba(255,255,255,.06);}
+
+/* ── CENTRE COL ── */
+.centre-col{display:flex;flex-direction:column;gap:9px;}
+
+/* Algorithm deep-dive */
+.algo-box{display:flex;flex-direction:column;gap:5px;}
+.algo-stage-card{
+  display:flex;align-items:stretch;gap:0;
+  background:var(--panel2);border:1px solid var(--edge);border-radius:var(--r);
+  overflow:hidden;transition:border-color .25s,transform .2s;cursor:default;
+}
+.algo-stage-card:hover{transform:translateX(2px);}
+.asc-accent{width:4px;flex-shrink:0;}
+.asc-a .asc-accent{background:linear-gradient(180deg,var(--cyan),var(--cyan2));}
+.asc-b .asc-accent{background:linear-gradient(180deg,var(--purple),var(--purple2));}
+.asc-c .asc-accent{background:linear-gradient(180deg,var(--teal),#0d9488);}
+.asc-d .asc-accent{background:linear-gradient(180deg,var(--amber),#d97706);}
+.asc-e .asc-accent{background:linear-gradient(180deg,var(--green),#16a34a);}
+.asc-body{flex:1;padding:7px 10px;display:flex;flex-direction:column;gap:2px;}
+.asc-label{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;}
+.asc-a .asc-label{color:var(--cyan);}
+.asc-b .asc-label{color:var(--purple);}
+.asc-c .asc-label{color:var(--teal);}
+.asc-d .asc-label{color:var(--amber);}
+.asc-e .asc-label{color:var(--green);}
+.asc-title{font-size:10.5px;font-weight:700;}
+.asc-desc{font-size:9px;color:var(--txt2);line-height:1.45;}
+.asc-formula{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;border-radius:5px;align-self:flex-start;border:1px solid;margin-top:2px;}
+.asc-a .asc-formula{background:rgba(0,229,255,.06);border-color:rgba(0,229,255,.2);color:var(--cyan2);}
+.asc-b .asc-formula{background:rgba(168,85,247,.06);border-color:rgba(168,85,247,.2);color:#c084fc;}
+.asc-c .asc-formula{background:rgba(20,184,166,.06);border-color:rgba(20,184,166,.2);color:var(--teal);}
+.asc-d .asc-formula{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.2);color:var(--amber);}
+.asc-e .asc-formula{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2);color:var(--green);}
+.asc-arrow{display:flex;align-items:center;justify-content:center;padding:0 8px;color:var(--txt3);font-size:11px;flex-shrink:0;}
+
+/* Operational iterative loop */
+.loop-diagram{display:flex;flex-direction:column;gap:5px;}
+.loop-row{display:flex;align-items:center;gap:5px;}
+.lnode{flex:1;padding:5px 7px;border-radius:7px;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;letter-spacing:.03em;text-align:center;border:1px solid;white-space:nowrap;transition:box-shadow .2s,transform .2s;}
+.lnode:hover{transform:translateY(-1px);}
+.ln-c{background:rgba(0,229,255,.07);border-color:rgba(0,229,255,.25);color:var(--cyan2);}
+.ln-c:hover{box-shadow:0 4px 14px rgba(0,229,255,.2);}
+.ln-p{background:rgba(168,85,247,.07);border-color:rgba(168,85,247,.25);color:#c084fc;}
+.ln-p:hover{box-shadow:0 4px 14px rgba(168,85,247,.2);}
+.ln-t{background:rgba(20,184,166,.07);border-color:rgba(20,184,166,.25);color:var(--teal);}
+.ln-t:hover{box-shadow:0 4px 14px rgba(20,184,166,.2);}
+.ln-a{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.25);color:var(--amber);}
+.ln-g{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.25);color:var(--green);}
+.ln-g:hover{box-shadow:0 4px 14px rgba(34,197,94,.2);}
+.larr{color:var(--txt3);font-size:11px;flex-shrink:0;}
+.lloop-tag{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--txt3);padding:2px 7px;background:rgba(255,255,255,.03);border-radius:4px;border:1px solid var(--edge);white-space:nowrap;animation:loopBlink 2s ease-in-out infinite;}
+@keyframes loopBlink{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+/* Canvas area */
+canvas#bayesc{display:block;width:100%;height:190px;}
+
+/* ── RIGHT COL ── */
+.right-col{display:flex;flex-direction:column;gap:9px;}
+
+/* Tech stack grid */
+.stack-grid{display:flex;flex-direction:column;gap:5px;}
+.stack-row{display:flex;gap:5px;}
+.stack-card{
+  flex:1;padding:8px 9px;background:var(--panel2);border:1px solid var(--edge);border-radius:var(--r);
+  transition:border-color .25s,transform .2s;cursor:default;text-align:center;
+}
+.stack-card:hover{transform:translateY(-2px);}
+.sc-c:hover{border-color:rgba(0,229,255,.3);box-shadow:0 4px 16px rgba(0,229,255,.1);}
+.sc-p:hover{border-color:rgba(168,85,247,.3);box-shadow:0 4px 16px rgba(168,85,247,.1);}
+.sc-t:hover{border-color:rgba(20,184,166,.3);box-shadow:0 4px 16px rgba(20,184,166,.1);}
+.sc-a:hover{border-color:rgba(245,158,11,.3);box-shadow:0 4px 16px rgba(245,158,11,.1);}
+.sc-g:hover{border-color:rgba(34,197,94,.3);box-shadow:0 4px 16px rgba(34,197,94,.1);}
+.stack-icon{font-size:13px;margin-bottom:3px;}
+.stack-name{font-family:'Syne',sans-serif;font-weight:700;font-size:10px;margin-bottom:1px;}
+.stack-role{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--txt3);letter-spacing:.07em;text-transform:uppercase;line-height:1.3;}
+
+/* Complexity analysis */
+.complexity-table{display:flex;flex-direction:column;gap:4px;}
+.cplx-row{display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--panel2);border:1px solid var(--edge);border-radius:7px;transition:border-color .2s;}
+.cplx-row:hover{border-color:rgba(0,229,255,.2);}
+.cplx-module{font-size:9px;font-weight:600;flex:1;color:var(--txt);}
+.cplx-badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;border-radius:4px;border:1px solid;white-space:nowrap;}
+.cb-c{background:rgba(0,229,255,.07);border-color:rgba(0,229,255,.2);color:var(--cyan2);}
+.cb-p{background:rgba(168,85,247,.07);border-color:rgba(168,85,247,.2);color:#c084fc;}
+.cb-t{background:rgba(20,184,166,.07);border-color:rgba(20,184,166,.2);color:var(--teal);}
+.cb-a{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.2);color:var(--amber);}
+.cb-g{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.2);color:var(--green);}
+
+/* Confidence bars */
+.conf-bars{display:flex;flex-direction:column;gap:5px;}
+.conf-row{display:flex;align-items:center;gap:6px;}
+.conf-label{font-size:9px;color:var(--txt2);width:110px;flex-shrink:0;line-height:1.3;}
+.conf-bg{flex:1;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden;border:1px solid rgba(255,255,255,.05);}
+.conf-bar{height:100%;border-radius:3px;width:0;transition:width 1.3s cubic-bezier(.22,1,.36,1);}
+.cb2-c{background:linear-gradient(90deg,var(--cyan2),var(--cyan));}
+.cb2-p{background:linear-gradient(90deg,var(--purple2),var(--purple));}
+.cb2-t{background:linear-gradient(90deg,#0d9488,var(--teal));}
+.cb2-a{background:linear-gradient(90deg,#d97706,var(--amber));}
+.cb2-g{background:linear-gradient(90deg,#16a34a,var(--green));}
+.conf-pct{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--txt3);width:28px;text-align:right;flex-shrink:0;}
+.bars-ready .conf-bar{width:var(--w);}
+
+/* Callout */
+.callout{
+  padding:9px 12px;background:linear-gradient(135deg,rgba(0,229,255,.04),rgba(168,85,247,.04));
+  border:1px solid rgba(0,229,255,.14);border-radius:var(--r);
+  display:flex;align-items:flex-start;gap:8px;flex-shrink:0;
+  position:relative;overflow:hidden;animation:calloutPulse 4s ease-in-out infinite;
+}
+@keyframes calloutPulse{0%,100%{border-color:rgba(0,229,255,.14);}50%{border-color:rgba(0,229,255,.3);}}
+.callout::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 20%,rgba(0,229,255,.03) 50%,transparent 80%);background-size:200% 100%;animation:shineSweep 5s ease-in-out infinite;pointer-events:none;}
+.callout-icon{width:26px;height:26px;border-radius:7px;flex-shrink:0;background:linear-gradient(135deg,rgba(0,229,255,.18),rgba(168,85,247,.18));border:1px solid rgba(0,229,255,.3);display:flex;align-items:center;justify-content:center;font-size:12px;animation:hexPulse 3s ease-in-out infinite;}
+.callout-text{font-size:9.5px;color:var(--txt2);line-height:1.55;}
+.callout-text strong{color:var(--cyan);font-weight:700;}
+
+/* Bottom bar */
+.bottombar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:4px 2px;margin-top:2px;}
+.bb-left{display:flex;align-items:center;gap:12px;}
+.bb-item{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--txt3);text-transform:uppercase;display:flex;align-items:center;gap:4px;}
+.bb-dot{width:5px;height:5px;border-radius:50%;animation:blink 2s ease-in-out infinite;}
+.bb-right{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--txt3);letter-spacing:.08em;}
+</style>
+</head>
+<body>
+
+<canvas id="bgcanvas"></canvas>
+<div class="bg-glow"></div>
+<div class="scanlines"></div>
+
+<div class="shell">
+
+  <!-- TOP BAR -->
+  <div class="topbar anim-up d0">
+    <div class="tb-left">
+      <div class="logo-mark">
+        <div class="logo-hex">Æ</div>
+        <div>
+          <div class="logo-text">AEGIS</div>
+          <div class="logo-sub">Autonomous Financial Crime Investigation</div>
+        </div>
+      </div>
+      <div class="slide-tag">▸ Slide 03 — Technical Approach</div>
+    </div>
+    <div class="tb-center">
+      <span class="hi">How AEGIS</span> Works Under the Hood
+    </div>
+    <div class="tb-right">
+      <div class="status-pill"><div class="live-dot"></div>Engine Active</div>
+      <div class="round-badge">Round 1 · Technical</div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero anim-up d1">
+    <div>
+      <div class="hero-kicker">Technical Architecture Deep-Dive</div>
+      <div class="hero-h">Entropy-Driven. <span class="hi">Graph-Traversed. Bayesian-Converged.</span></div>
+      <div class="hero-sub">AEGIS's custom algorithm fuses information-theoretic evidence planning, XGBoost risk scoring, probabilistic belief updates and temporal pattern detection into a single autonomous reasoning loop — no human in the loop required until a final decision.</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-val c">O(k·E)</div><div class="hs-lbl">Graph Complexity</div></div>
+      <div class="hs"><div class="hs-val p">H(X)</div><div class="hs-lbl">Entropy Confidence</div></div>
+      <div class="hs"><div class="hs-val g">&lt;2s</div><div class="hs-lbl">Decision Latency</div></div>
+    </div>
+  </div>
+
+  <!-- TICKER -->
+  <div class="ticker-wrap anim-up d2">
+    <div class="ticker">
+      <div class="ticker-item">Stage A: Risk Normalization<span>XGBoost → sigmoid → [0,1]</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Stage B: Entropy Confidence<span>H = -Σ p·log₂(p)</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Stage C: Adaptive Evidence Selection<span>Utility = InfoGain / QueryCost</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Stage D: Temporal Pattern Matching<span>Δt velocity · dormancy bursts</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Stage E: Decision<span>P(fraud|evidence) &gt; θ → Block</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Bayesian Update<span>P(H|E) = P(E|H)·P(H) / P(E)</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Graph Traversal<span>BFS/DFS multi-hop entity linking</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Iterative Loop<span>gather evidence → update → recheck confidence</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Stage A: Risk Normalization<span>XGBoost → sigmoid → [0,1]</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Stage B: Entropy Confidence<span>H = -Σ p·log₂(p)</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Stage C: Adaptive Evidence Selection<span>Utility = InfoGain / QueryCost</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Stage D: Temporal Pattern Matching<span>Δt velocity · dormancy bursts</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Stage E: Decision<span>P(fraud|evidence) &gt; θ → Block</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Bayesian Update<span>P(H|E) = P(E|H)·P(H) / P(E)</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Graph Traversal<span>BFS/DFS multi-hop entity linking</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Iterative Loop<span>gather evidence → update → recheck confidence</span><span class="ticker-sep">·</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN 3-COL -->
+  <div class="main">
+
+    <!-- LEFT -->
+    <div class="left-col">
+
+      <div class="panel anim-left d3">
+        <div class="panel-hd">
+          <div class="phi phi-c">⬡</div>
+          <div><div class="phd c">Core Technical Components</div><div class="phd-s s">Five engines powering AEGIS</div></div>
+        </div>
+        <div class="panel-bd">
+          <div class="tech-item ti-c">
+            <div class="tech-icon phi-c">📈</div>
+            <div class="tech-body">
+              <h4 class="c">XGBoost Risk Scorer</h4>
+              <p>Gradient-boosted ensemble on 40+ engineered features — outputs a normalized [0,1] risk prior for every flagged transaction.</p>
+              <span class="tech-tag tag-c">Supervised ML</span>
+            </div>
+          </div>
+          <div class="tech-item ti-p">
+            <div class="tech-icon phi-p">🧠</div>
+            <div class="tech-body">
+              <h4 class="p">Entropy Confidence Engine</h4>
+              <p>Computes Shannon entropy H(X) over the current belief distribution — drives the loop until uncertainty collapses below threshold θ.</p>
+              <span class="tech-tag tag-p">Information Theory</span>
+            </div>
+          </div>
+          <div class="tech-item ti-t">
+            <div class="tech-icon phi-t">🕸️</div>
+            <div class="tech-body">
+              <h4 class="t">Graph Intelligence Engine</h4>
+              <p>BFS/DFS traversal over account-entity graph — uncovers shells, layering rings and circular flow patterns at arbitrary hop depth.</p>
+              <span class="tech-tag tag-t">Graph AI</span>
+            </div>
+          </div>
+          <div class="tech-item ti-a">
+            <div class="tech-icon phi-a">⏱️</div>
+            <div class="tech-body">
+              <h4 class="a">Temporal Pattern Engine</h4>
+              <p>Detects Δt velocity spikes, dormant-to-active reactivation events and time-windowed multi-hop burst sequences.</p>
+              <span class="tech-tag tag-a">Temporal ML</span>
+            </div>
+          </div>
+          <div class="tech-item ti-g">
+            <div class="tech-icon phi-g">🎲</div>
+            <div class="tech-body">
+              <h4 class="g">Bayesian Belief Engine</h4>
+              <p>Each evidence item triggers a Bayes update: P(fraud|E) ← P(E|fraud)·P(fraud) / P(E), converging the posterior autonomously.</p>
+              <span class="tech-tag tag-g">Probabilistic AI</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel anim-left d4">
+        <div class="panel-hd">
+          <div class="phi phi-p">⚙</div>
+          <div><div class="phd p">Data Flow Steps</div><div class="phd-s s">Event ingestion to compliance output</div></div>
+        </div>
+        <div class="panel-bd">
+          <div class="flow-steps">
+            <div class="fstep fs-1 fstep-active">
+              <div class="fstep-num c">Step 1</div>
+              <div class="fstep-name">Ingest &amp; Feature Eng.</div>
+              <div class="fstep-fx">40+ features</div>
+            </div>
+            <div class="fstep fs-2">
+              <div class="fstep-num p">Step 2</div>
+              <div class="fstep-name">XGBoost Scoring</div>
+              <div class="fstep-fx">→ risk ∈ [0,1]</div>
+            </div>
+            <div class="fstep fs-3">
+              <div class="fstep-num t">Step 3</div>
+              <div class="fstep-name">High-Risk Filter</div>
+              <div class="fstep-fx">score &gt; 0.65</div>
+            </div>
+            <div class="fstep fs-4">
+              <div class="fstep-num a">Step 4</div>
+              <div class="fstep-name">Adaptive Investigation</div>
+              <div class="fstep-fx">loop until θ met</div>
+            </div>
+            <div class="fstep fs-5">
+              <div class="fstep-num g">Step 5</div>
+              <div class="fstep-name">Final Decision</div>
+              <div class="fstep-fx">Block / Approve</div>
+            </div>
+            <div class="fstep fs-6">
+              <div class="fstep-num r">Step 6</div>
+              <div class="fstep-name">Compliance Report</div>
+              <div class="fstep-fx">STR / Audit trail</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CENTRE -->
+    <div class="centre-col">
+
+      <div class="panel anim-up d3">
+        <div class="panel-hd">
+          <div class="phi phi-c">◈</div>
+          <div><div class="phd c">Custom Algorithm — Stage-by-Stage</div><div class="phd-s s">The closed-loop reasoning pipeline in full detail</div></div>
+        </div>
+        <div class="panel-bd" style="gap:5px;">
+          <div class="algo-box">
+
+            <div class="algo-stage-card asc-a">
+              <div class="asc-accent"></div>
+              <div class="asc-body">
+                <div class="asc-label">Stage A</div>
+                <div class="asc-title">Initial Risk Normalization</div>
+                <div class="asc-desc">Raw transaction features pass through XGBoost. Output is sigmoid-normalized to a probability prior P₀(fraud) ∈ [0,1] for each event entering the investigation loop.</div>
+                <div class="asc-formula">r = sigmoid(XGBoost(x)) → [0,1]</div>
+              </div>
+              <div class="asc-arrow">↓</div>
+            </div>
+
+            <div class="algo-stage-card asc-b">
+              <div class="asc-accent"></div>
+              <div class="asc-body">
+                <div class="asc-label">Stage B</div>
+                <div class="asc-title">Confidence Estimation via Entropy</div>
+                <div class="asc-desc">Shannon entropy is computed over the current belief distribution. High entropy = high uncertainty → more evidence needed. Low entropy = confident belief → proceed to decision.</div>
+                <div class="asc-formula">H(X) = -Σ p(x)·log₂ p(x) &lt; θ → exit loop</div>
+              </div>
+              <div class="asc-arrow">↓</div>
+            </div>
+
+            <div class="algo-stage-card asc-c">
+              <div class="asc-accent"></div>
+              <div class="asc-body">
+                <div class="asc-label">Stage C</div>
+                <div class="asc-title">Adaptive Evidence Selection</div>
+                <div class="asc-desc">The Evidence Planner scores every available query source using information utility: expected information gain divided by query cost. Highest-utility source is queried next — maximally efficient investigation.</div>
+                <div class="asc-formula">Utility = InfoGain(source) / QueryCost(source)</div>
+              </div>
+              <div class="asc-arrow">↓</div>
+            </div>
+
+            <div class="algo-stage-card asc-d">
+              <div class="asc-accent"></div>
+              <div class="asc-body">
+                <div class="asc-label">Stage D</div>
+                <div class="asc-title">Temporal Pattern Matching</div>
+                <div class="asc-desc">Graph data and transaction history are scanned for Δt anomalies: velocity bursts, dormant account reactivation, timed round-tripping and multi-hop circular flows within time windows.</div>
+                <div class="asc-formula">flag if Δt &lt; τ_burst ∨ pattern ∈ KnownRings</div>
+              </div>
+              <div class="asc-arrow">↓</div>
+            </div>
+
+            <div class="algo-stage-card asc-e">
+              <div class="asc-accent"></div>
+              <div class="asc-body">
+                <div class="asc-label">Stage E</div>
+                <div class="asc-title">Block / Approve Decision</div>
+                <div class="asc-desc">Once entropy falls below threshold, the converged posterior P(fraud|all evidence) is compared to the decision boundary θ. Above θ → BLOCK and generate STR. Below → APPROVE and log.</div>
+                <div class="asc-formula">P(fraud|E) &gt; θ → BLOCK · else → APPROVE</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="panel anim-up d4">
+        <div class="panel-hd">
+          <div class="phi phi-t">▶</div>
+          <div><div class="phd t">Iterative Investigation Loop</div><div class="phd-s s">Autonomous cycle — terminates only when confident</div></div>
+        </div>
+        <div class="panel-bd">
+          <div class="loop-diagram">
+            <div class="loop-row">
+              <div class="lnode ln-c">🔔 Event Arrives</div>
+              <div class="larr">→</div>
+              <div class="lnode ln-p">⚡ XGBoost Score</div>
+              <div class="larr">→</div>
+              <div class="lnode ln-a">◆ Entropy &lt; θ?</div>
+            </div>
+            <div class="loop-row" style="padding-left:8px;">
+              <div class="lloop-tag">No → confidence low, loop again</div>
+              <div class="larr">↓</div>
+              <div class="lnode ln-t" style="flex:none;padding:5px 11px;">📋 Planner picks best evidence</div>
+            </div>
+            <div class="loop-row">
+              <div class="lnode ln-t">🕸️ Graph + History Query</div>
+              <div class="larr">→</div>
+              <div class="lnode ln-p">🎲 Bayesian Update P(fraud|E)</div>
+              <div class="larr">→</div>
+              <div class="lnode ln-c">↺ Recompute Entropy</div>
+            </div>
+            <div class="loop-row" style="padding-left:8px;">
+              <div class="lloop-tag">Yes → threshold met, exit</div>
+              <div class="larr">→</div>
+              <div class="lnode ln-g" style="flex:none;padding:5px 12px;">✅ Decision + STR Report</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel anim-scale d5">
+        <div class="panel-hd">
+          <div class="phi phi-p">🎲</div>
+          <div><div class="phd p">Bayesian Belief Convergence</div><div class="phd-s s">Posterior P(fraud|evidence) evolving in real time</div></div>
+        </div>
+        <canvas id="bayesc"></canvas>
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-col">
+
+      <div class="panel anim-right d3">
+        <div class="panel-hd">
+          <div class="phi phi-c">🔧</div>
+          <div><div class="phd c">Technology Stack</div><div class="phd-s s">Libraries &amp; frameworks used</div></div>
+        </div>
+        <div class="panel-bd" style="padding:8px;">
+          <div class="stack-grid">
+            <div class="stack-row">
+              <div class="stack-card sc-c">
+                <div class="stack-icon">📈</div>
+                <div class="stack-name c">XGBoost</div>
+                <div class="stack-role">Gradient Boosted Risk Scoring</div>
+              </div>
+              <div class="stack-card sc-p">
+                <div class="stack-icon">🧮</div>
+                <div class="stack-name p">SciPy / NumPy</div>
+                <div class="stack-role">Entropy &amp; Bayesian Computation</div>
+              </div>
+            </div>
+            <div class="stack-row">
+              <div class="stack-card sc-t">
+                <div class="stack-icon">🕸️</div>
+                <div class="stack-name t">NetworkX</div>
+                <div class="stack-role">Graph Traversal BFS/DFS</div>
+              </div>
+              <div class="stack-card sc-a">
+                <div class="stack-icon">⚡</div>
+                <div class="stack-name a">Apache Kafka</div>
+                <div class="stack-role">Real-time Event Streaming</div>
+              </div>
+            </div>
+            <div class="stack-row">
+              <div class="stack-card sc-g">
+                <div class="stack-icon">🗃️</div>
+                <div class="stack-name g">Neo4j</div>
+                <div class="stack-role">Graph Database Storage</div>
+              </div>
+              <div class="stack-card sc-c">
+                <div class="stack-icon">🐍</div>
+                <div class="stack-name c">FastAPI</div>
+                <div class="stack-role">Decision API + Compliance Endpoint</div>
+              </div>
+            </div>
+            <div class="stack-row">
+              <div class="stack-card sc-p">
+                <div class="stack-icon">📊</div>
+                <div class="stack-name p">Pandas / Polars</div>
+                <div class="stack-role">Feature Engineering Pipeline</div>
+              </div>
+              <div class="stack-card sc-t">
+                <div class="stack-icon">🐳</div>
+                <div class="stack-name t">Docker / K8s</div>
+                <div class="stack-role">Containerised Deployment</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel anim-right d4">
+        <div class="panel-hd">
+          <div class="phi phi-a">⏱</div>
+          <div><div class="phd a">Algorithmic Complexity</div><div class="phd-s s">Per module, per decision cycle</div></div>
+        </div>
+        <div class="panel-bd">
+          <div class="complexity-table">
+            <div class="cplx-row">
+              <div class="cplx-module">XGBoost Inference</div>
+              <div class="cplx-badge cb-c">O(T·depth)</div>
+            </div>
+            <div class="cplx-row">
+              <div class="cplx-module">Entropy Computation</div>
+              <div class="cplx-badge cb-p">O(n·log n)</div>
+            </div>
+            <div class="cplx-row">
+              <div class="cplx-module">Graph BFS Traversal</div>
+              <div class="cplx-badge cb-t">O(V + E)</div>
+            </div>
+            <div class="cplx-row">
+              <div class="cplx-module">Evidence Utility Rank</div>
+              <div class="cplx-badge cb-a">O(k·log k)</div>
+            </div>
+            <div class="cplx-row">
+              <div class="cplx-module">Bayesian Posterior Update</div>
+              <div class="cplx-badge cb-g">O(n)</div>
+            </div>
+            <div class="cplx-row">
+              <div class="cplx-module">Temporal Pattern Match</div>
+              <div class="cplx-badge cb-c">O(m·w)</div>
+            </div>
+            <div class="cplx-row">
+              <div class="cplx-module">Full Decision Cycle</div>
+              <div class="cplx-badge cb-p">O(k · (V+E))</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel anim-right d5" id="conf-panel">
+        <div class="panel-hd">
+          <div class="phi phi-g">🎯</div>
+          <div><div class="phd g">Evidence Contribution to Confidence</div><div class="phd-s s">InfoGain per evidence source</div></div>
+        </div>
+        <div class="panel-bd" id="conf-bd">
+          <div class="conf-bars">
+            <div class="conf-row"><div class="conf-label">Graph Ring Detected</div><div class="conf-bg"><div class="conf-bar cb2-c" style="--w:96%"></div></div><div class="conf-pct">96%</div></div>
+            <div class="conf-row"><div class="conf-label">Bayesian Posterior</div><div class="conf-bg"><div class="conf-bar cb2-p" style="--w:88%"></div></div><div class="conf-pct">88%</div></div>
+            <div class="conf-row"><div class="conf-label">XGBoost Risk Score</div><div class="conf-bg"><div class="conf-bar cb2-t" style="--w:82%"></div></div><div class="conf-pct">82%</div></div>
+            <div class="conf-row"><div class="conf-label">Temporal Velocity</div><div class="conf-bg"><div class="conf-bar cb2-a" style="--w:71%"></div></div><div class="conf-pct">71%</div></div>
+            <div class="conf-row"><div class="conf-label">Watchlist Match</div><div class="conf-bg"><div class="conf-bar cb2-g" style="--w:58%"></div></div><div class="conf-pct">58%</div></div>
+            <div class="conf-row"><div class="conf-label">Behavioural Drift</div><div class="conf-bg"><div class="conf-bar cb2-c" style="--w:44%"></div></div><div class="conf-pct">44%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel anim-right d6">
+        <div class="panel-hd">
+          <div class="phi phi-c">⚡</div>
+          <div><div class="phd c">Why This Approach Wins</div><div class="phd-s s">Technical differentiators</div></div>
+        </div>
+        <div class="panel-bd">
+          <div class="callout">
+            <div class="callout-icon">🧠</div>
+            <div class="callout-text"><strong>Adaptive by design:</strong> The entropy loop means AEGIS only gathers evidence until it is confident — never over-investigating, never under-investigating. Every query is chosen to maximise information gain per unit cost.</div>
+          </div>
+          <div class="callout" style="animation-delay:.5s;">
+            <div class="callout-icon">🕸️</div>
+            <div class="callout-text"><strong>Graph-native:</strong> Fraud rings, shell chains, and circular laundering are structurally invisible to row-based ledgers. AEGIS traverses entity graphs at arbitrary depth — no hop limit.</div>
+          </div>
+          <div class="callout" style="animation-delay:1s;">
+            <div class="callout-icon">📋</div>
+            <div class="callout-text"><strong>Audit-ready output:</strong> Every evidence step, Bayesian update, and decision boundary is logged — producing a regulator-ready reasoning chain alongside the final STR report.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottombar anim-up d7">
+    <div class="bb-left">
+      <div class="bb-item"><div class="bb-dot" style="background:var(--cyan)"></div>XGBoost + Feature Engineering</div>
+      <div class="bb-item"><div class="bb-dot" style="background:var(--purple)"></div>Shannon Entropy Confidence</div>
+      <div class="bb-item"><div class="bb-dot" style="background:var(--teal)"></div>Graph BFS/DFS Traversal</div>
+      <div class="bb-item"><div class="bb-dot" style="background:var(--amber)"></div>Temporal Δt Pattern Matching</div>
+      <div class="bb-item"><div class="bb-dot" style="background:var(--green)"></div>Bayesian Posterior Convergence</div>
+    </div>
+    <div class="bb-right">AEGIS · Technical Approach · Round 2 Presentation</div>
+  </div>
+
+</div>
+
+<script>
+/* 1. BACKGROUND PARTICLE FIELD */
+(function(){
+  const c=document.getElementById('bgcanvas');
+  const x=c.getContext('2d');
+  let W,H;
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  const DOTS=[];
+  const COL=['rgba(0,229,255,','rgba(168,85,247,','rgba(20,184,166,'];
+  for(let i=0;i<70;i++){
+    DOTS.push({x:Math.random()*1920,y:Math.random()*1080,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,r:Math.random()*1.5+.4,col:COL[Math.floor(Math.random()*3)],a:Math.random()*.25+.05});
+  }
+  function frame(){
+    x.clearRect(0,0,W,H);
+    for(let i=0;i<DOTS.length;i++){
+      for(let j=i+1;j<DOTS.length;j++){
+        const dx=DOTS[i].x-DOTS[j].x,dy=DOTS[i].y-DOTS[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<140){x.beginPath();x.moveTo(DOTS[i].x,DOTS[i].y);x.lineTo(DOTS[j].x,DOTS[j].y);x.strokeStyle=`rgba(0,229,255,${.14*(1-d/140)})`;x.lineWidth=.6;x.stroke();}
+      }
+    }
+    DOTS.forEach(d=>{
+      d.x+=d.vx;d.y+=d.vy;
+      if(d.x<0)d.x=W;if(d.x>W)d.x=0;if(d.y<0)d.y=H;if(d.y>H)d.y=0;
+      x.beginPath();x.arc(d.x,d.y,d.r,0,Math.PI*2);x.fillStyle=d.col+d.a+')';x.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+/* 2. BAYESIAN CONVERGENCE CHART */
+(function(){
+  const canvas=document.getElementById('bayesc');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){
+    const r=canvas.getBoundingClientRect();
+    W=r.width;H=r.height;
+    canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;
+    ctx.scale(devicePixelRatio,devicePixelRatio);
+  }
+  resize();new ResizeObserver(resize).observe(canvas);
+
+  // Simulate Bayesian convergence series + entropy
+  const steps=14;
+  // P(fraud|evidence) at each iteration
+  const posterior=[0.12,0.18,0.25,0.38,0.49,0.61,0.70,0.78,0.84,0.88,0.91,0.93,0.95,0.96];
+  // Entropy (normalised)
+  const entropy=[0.95,0.92,0.87,0.80,0.74,0.66,0.57,0.48,0.39,0.31,0.22,0.16,0.10,0.06];
+  const threshold=0.85;
+
+  let tick=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    tick+=0.025;
+
+    const padL=36,padR=12,padT=12,padB=28;
+    const cw=W-padL-padR,ch=H-padT-padB;
+
+    // Background
+    ctx.fillStyle='rgba(5,10,22,.96)';ctx.fillRect(0,0,W,H);
+
+    // Grid
+    ctx.strokeStyle='rgba(0,229,255,.05)';ctx.lineWidth=.8;
+    for(let i=0;i<=4;i++){
+      const y=padT+ch*(1-i/4);
+      ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(padL+cw,y);ctx.stroke();
+      ctx.fillStyle='rgba(100,160,210,.4)';ctx.font='7px JetBrains Mono,monospace';ctx.textAlign='right';ctx.textBaseline='middle';
+      ctx.fillText((i*25)+'%',padL-4,y);
+    }
+    for(let i=0;i<steps;i++){
+      const x=padL+cw*i/(steps-1);
+      ctx.beginPath();ctx.moveTo(x,padT);ctx.lineTo(x,padT+ch);ctx.stroke();
+    }
+
+    // Threshold line
+    const ty=padT+ch*(1-threshold);
+    ctx.beginPath();ctx.setLineDash([6,4]);ctx.moveTo(padL,ty);ctx.lineTo(padL+cw,ty);
+    ctx.strokeStyle='rgba(239,68,68,.5)';ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(239,68,68,.7)';ctx.font='7.5px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='bottom';
+    ctx.fillText('θ = 85%',padL+4,ty-2);
+
+    // Decision point marker
+    const decIdx=10; // where posterior crosses threshold
+    const decX=padL+cw*decIdx/(steps-1);
+    const a=.6+Math.sin(tick)*0.2;
+    ctx.beginPath();ctx.arc(decX,ty,5+Math.sin(tick)*2,0,Math.PI*2);
+    ctx.fillStyle=`rgba(239,68,68,${a*.3})`;ctx.fill();
+    ctx.beginPath();ctx.arc(decX,ty,4,0,Math.PI*2);
+    ctx.fillStyle='#ef4444';ctx.shadowColor='#ef4444';ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
+
+    // Entropy line
+    ctx.beginPath();
+    for(let i=0;i<steps;i++){
+      const x=padL+cw*i/(steps-1);
+      const y=padT+ch*(1-entropy[i]);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle='rgba(168,85,247,.6)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+
+    // Entropy area
+    ctx.beginPath();
+    for(let i=0;i<steps;i++){const x=padL+cw*i/(steps-1);const y=padT+ch*(1-entropy[i]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.lineTo(padL+cw,padT+ch);ctx.lineTo(padL,padT+ch);ctx.closePath();
+    ctx.fillStyle='rgba(168,85,247,.06)';ctx.fill();
+
+    // Posterior line
+    ctx.beginPath();
+    for(let i=0;i<steps;i++){
+      const x=padL+cw*i/(steps-1);
+      const y=padT+ch*(1-posterior[i]);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    const grad=ctx.createLinearGradient(padL,0,padL+cw,0);
+    grad.addColorStop(0,'rgba(0,180,212,.8)');
+    grad.addColorStop(0.7,'rgba(0,229,255,.9)');
+    grad.addColorStop(1,'rgba(34,197,94,.9)');
+    ctx.strokeStyle=grad;ctx.lineWidth=2.2;ctx.stroke();
+
+    // Posterior area
+    ctx.beginPath();
+    for(let i=0;i<steps;i++){const x=padL+cw*i/(steps-1);const y=padT+ch*(1-posterior[i]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.lineTo(padL+cw,padT+ch);ctx.lineTo(padL,padT+ch);ctx.closePath();
+    const areaGrad=ctx.createLinearGradient(0,padT,0,padT+ch);
+    areaGrad.addColorStop(0,'rgba(0,229,255,.12)');areaGrad.addColorStop(1,'rgba(0,229,255,.01)');
+    ctx.fillStyle=areaGrad;ctx.fill();
+
+    // Dots on posterior
+    for(let i=0;i<steps;i++){
+      const x=padL+cw*i/(steps-1);
+      const y=padT+ch*(1-posterior[i]);
+      ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
+      const col=posterior[i]>=threshold?'#22c55e':'#00e5ff';
+      ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=6;ctx.fill();ctx.shadowBlur=0;
+    }
+
+    // Animated scan pulse
+    const scanX=padL+cw*((tick*.3)%1);
+    const scanGrad=ctx.createLinearGradient(scanX-20,0,scanX+20,0);
+    scanGrad.addColorStop(0,'rgba(0,229,255,0)');scanGrad.addColorStop(0.5,'rgba(0,229,255,.08)');scanGrad.addColorStop(1,'rgba(0,229,255,0)');
+    ctx.fillStyle=scanGrad;ctx.fillRect(scanX-20,padT,40,ch);
+
+    // Axis labels
+    ctx.fillStyle='rgba(100,160,210,.4)';ctx.font='7px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='top';
+    ['0','2','4','6','8','10','12','14'].forEach((lbl,i)=>{
+      const x=padL+cw*i/(steps-1);
+      if(i<steps)ctx.fillText('E'+i,x,padT+ch+4);
+    });
+
+    // Legend
+    const lx=padL+8,ly=padT+8;
+    [[grad,'P(fraud|E) — Posterior'],[null,'H(X) — Entropy']].forEach(([col,lbl],i)=>{
+      const y2=ly+i*14;
+      ctx.beginPath();ctx.moveTo(lx,y2);ctx.lineTo(lx+18,y2);
+      if(col){ctx.strokeStyle=col;ctx.setLineDash([]);}else{ctx.strokeStyle='rgba(168,85,247,.7)';ctx.setLineDash([4,3]);}
+      ctx.lineWidth=1.8;ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle='rgba(150,190,230,.55)';ctx.font='7.5px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.fillText(lbl,lx+22,y2);
+    });
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* 3. EVIDENCE BARS */
+setTimeout(()=>{const bd=document.getElementById('conf-bd');if(bd)bd.classList.add('bars-ready');},800);
+
+/* 4. DATA FLOW STEP CYCLER */
+(function(){
+  const steps=document.querySelectorAll('.fstep');
+  if(!steps.length)return;
+  let cur=0;
+  function next(){steps.forEach(s=>s.classList.remove('fstep-active'));steps[cur].classList.add('fstep-active');cur=(cur+1)%steps.length;}
+  next();setInterval(next,1600);
+})();
+</script>
+</body>
+</html>

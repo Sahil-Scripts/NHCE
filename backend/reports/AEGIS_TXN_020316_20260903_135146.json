@@ -1,0 +1,87 @@
+{
+  "aegis_version": "1.0.0",
+  "report_id": "AEGIS_TXN_020316_20260903_135146",
+  "generated_at": "2026-09-03T13:51:46.513667",
+  "transaction": {
+    "txn_id": "TXN_020316",
+    "sender_id": "ACC_0185",
+    "receiver_id": "ACC_0233",
+    "amount_inr": 196787.42,
+    "timestamp": "2025-03-25 05:45:57.000000"
+  },
+  "decision": {
+    "outcome": "APPROVE",
+    "p_fraud": 0.0315,
+    "confidence_pct": 96.9,
+    "threshold_used": 0.85,
+    "reason": "P(fraud|evidence) = 0.031 below decision boundary \u03b8=0.85. Insufficient evidence to flag \u2014 transaction approved and logged."
+  },
+  "investigation": {
+    "total_evidence_sources": 0,
+    "sources_queried": [],
+    "belief_updates": 0,
+    "p_fraud_initial": 0.0315,
+    "p_fraud_final": 0.0315,
+    "belief_history": [
+      {
+        "step": 0,
+        "evidence": "XGBoost_prior",
+        "likelihood_ratio": 1.0,
+        "p_fraud": 0.03149762749671936
+      }
+    ],
+    "query_log": []
+  },
+  "evidence": {
+    "anomalies_detected": [],
+    "anomaly_count": 0,
+    "graph": {
+      "is_circular": null,
+      "circular_length": null,
+      "ring_members": [],
+      "shell_chain_length": null,
+      "shell_chain_path": [],
+      "reachable_accounts": null,
+      "reachable_watchlisted": null,
+      "total_flow_amount_inr": null,
+      "graph_risk_score": null
+    },
+    "temporal": {
+      "velocity_burst": null,
+      "velocity_burst_count": null,
+      "dormant_reactivation": null,
+      "dormancy_days": null,
+      "round_trip_detected": null,
+      "round_trip_hours": null,
+      "threshold_split_pattern": null,
+      "temporal_risk_score": null
+    },
+    "xgboost": {
+      "risk_prior": 0.03149762749671936,
+      "raw_score": -3.4258387088775635,
+      "top_features": [
+        {
+          "feature": "is_weekend",
+          "importance": 0.050763532519340515
+        },
+        {
+          "feature": "velocity_1h",
+          "importance": 0.04120772331953049
+        },
+        {
+          "feature": "is_sender_shell",
+          "importance": 0.03657340258359909
+        },
+        {
+          "feature": "below_threshold",
+          "importance": 0.033667974174022675
+        },
+        {
+          "feature": "receiver_in_amt_24h",
+          "importance": 0.03238147869706154
+        }
+      ]
+    }
+  },
+  "compliance": null
+}

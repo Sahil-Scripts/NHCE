@@ -1,0 +1,134 @@
+{
+  "aegis_version": "1.0.0",
+  "report_id": "AEGIS_TXN_099981_20260903_140506",
+  "generated_at": "2026-09-03T14:05:06.897993",
+  "transaction": {
+    "txn_id": "TXN_099981",
+    "sender_id": "ACC_0259",
+    "receiver_id": "ACC_0366",
+    "amount_inr": 2450000.0,
+    "timestamp": "2025-06-15 14:22:10"
+  },
+  "decision": {
+    "outcome": "BLOCK",
+    "p_fraud": 0.998,
+    "confidence_pct": 99.8,
+    "threshold_used": 0.85,
+    "reason": "P(fraud|evidence) = 0.998 exceeds decision boundary theta=0.85. Detected 4 anomaly signal(s): ROUND-TRIP: funds returned in 1.4h; CIRCULAR LOOP: 3-member ring detected...."
+  },
+  "investigation": {
+    "total_evidence_sources": 3,
+    "sources_queried": [
+      "watchlist_lookup",
+      "graph_traversal",
+      "temporal_analysis"
+    ],
+    "belief_updates": 3,
+    "p_fraud_initial": 0.45,
+    "p_fraud_final": 0.998,
+    "belief_history": [
+      {
+        "step": 0,
+        "evidence": "XGBoost_prior",
+        "likelihood_ratio": 1.0,
+        "p_fraud": 0.45
+      },
+      {
+        "step": 1,
+        "evidence": "circular_loop_detected",
+        "likelihood_ratio": 12.0,
+        "p_fraud": 0.9076
+      },
+      {
+        "step": 2,
+        "evidence": "shell_chain_length_3plus",
+        "likelihood_ratio": 8.0,
+        "p_fraud": 0.9874
+      },
+      {
+        "step": 3,
+        "evidence": "watchlisted_in_subgraph",
+        "likelihood_ratio": 6.5,
+        "p_fraud": 0.998
+      }
+    ],
+    "query_log": []
+  },
+  "evidence": {
+    "anomalies_detected": [
+      "ROUND-TRIP: funds returned in 1.4h",
+      "CIRCULAR LOOP: 3-member ring detected",
+      "SHELL CHAIN: 3-hop chain to shell network",
+      "WATCHLIST: 20 watchlisted accounts in network"
+    ],
+    "anomaly_count": 4,
+    "graph": {
+      "is_circular": true,
+      "circular_length": 3,
+      "ring_members": [
+        "ACC_0259",
+        "ACC_0366",
+        "ACC_0216",
+        "ACC_0259"
+      ],
+      "shell_chain_length": 3,
+      "shell_chain_path": [
+        "ACC_0259",
+        "ACC_0366",
+        "ACC_0258",
+        "ACC_0292"
+      ],
+      "reachable_accounts": 500,
+      "reachable_watchlisted": 20,
+      "total_flow_amount_inr": 2108408918.69,
+      "graph_risk_score": 7.9
+    },
+    "temporal": {
+      "velocity_burst": false,
+      "velocity_burst_count": 0,
+      "dormant_reactivation": false,
+      "dormancy_days": 0.0,
+      "round_trip_detected": true,
+      "round_trip_hours": 1.4,
+      "threshold_split_pattern": false,
+      "temporal_risk_score": 3.0
+    },
+    "xgboost": {
+      "risk_prior": 0.45,
+      "raw_score": -0.2,
+      "top_features": [
+        {
+          "feature": "is_sender_shell",
+          "importance": 0.05
+        }
+      ]
+    }
+  },
+  "compliance": {
+    "str_type": "AUTOMATED_STR",
+    "reporting_entity": "AEGIS_AUTONOMOUS_AML_SYSTEM",
+    "str_date": "2026-09-03",
+    "str_time": "14:05:06",
+    "subject_account": "ACC_0259",
+    "beneficiary_account": "ACC_0366",
+    "transaction_amount": 2450000.0,
+    "currency": "INR",
+    "fraud_probability": 0.998,
+    "suspicion_grounds": [
+      "ROUND-TRIP: funds returned in 1.4h",
+      "CIRCULAR LOOP: 3-member ring detected",
+      "SHELL CHAIN: 3-hop chain to shell network",
+      "WATCHLIST: 20 watchlisted accounts in network"
+    ],
+    "regulatory_framework": [
+      "PMLA_2002",
+      "RBI_KYC_MASTER",
+      "FATF_R16",
+      "FIU_IND_STR"
+    ],
+    "fiu_ind_compliance": true,
+    "fatf_aml_compliant": true,
+    "audit_trail_complete": true,
+    "recommendation": "FREEZE_ACCOUNT_PENDING_INVESTIGATION"
+  }
+}

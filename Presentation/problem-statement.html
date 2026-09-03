@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS — Problem Statement</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#03060f; --bg2:#050c1a; --panel:#070e1e; --panel2:#090f1f;
+  --edge:rgba(239,68,68,.08); --edge2:rgba(239,68,68,.22);
+  --cyan:#00e5ff; --cyan2:#00bcd4; --cyan-dim:rgba(0,229,255,.1);
+  --red:#ef4444; --red2:#dc2626; --red-dim:rgba(239,68,68,.1);
+  --orange:#f97316; --orange-dim:rgba(249,115,22,.1);
+  --amber:#f59e0b; --amber-dim:rgba(245,158,11,.1);
+  --purple:#a855f7; --purple2:#7c3aed;
+  --green:#22c55e;
+  --txt:#dde8f8; --txt2:#7a9bc0; --txt3:#3a5570;
+  --r:10px; --r2:13px;
+}
+html,body{width:100vw;min-height:100vh;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--txt);}
+
+/* ═══ BACKGROUND ═══ */
+#bgcanvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.bg-glow{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 55% 45% at 15% 50%,rgba(239,68,68,.06) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 35% at 85% 30%,rgba(249,115,22,.05) 0%,transparent 65%),
+    radial-gradient(ellipse 35% 28% at 50% 85%,rgba(239,68,68,.04) 0%,transparent 65%);
+  animation:glowShift 9s ease-in-out infinite alternate;
+}
+@keyframes glowShift{
+  0%{opacity:.8;}100%{opacity:1;}
+}
+.scanlines{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(239,68,68,.004) 2px,rgba(239,68,68,.004) 4px);
+  animation:scanMove 5s linear infinite;
+}
+@keyframes scanMove{0%{background-position:0 0;}100%{background-position:0 40px;}}
+
+/* ═══ SHELL ═══ */
+.shell{
+  position:relative;z-index:2;
+  width:100vw;min-height:100vh;
+  display:flex;flex-direction:column;
+  padding:11px 18px 9px;
+  gap:8px;
+}
+
+/* ═══ ENTRY ANIMATIONS ═══ */
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeSlideLeft{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeSlideRight{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+@keyframes glitchIn{
+  0%{opacity:0;transform:translateX(-6px) skewX(-3deg);}
+  20%{opacity:.8;transform:translateX(3px) skewX(1deg);}
+  40%{opacity:.6;transform:translateX(-2px);}
+  60%{opacity:1;transform:translateX(1px);}
+  80%{transform:translateX(0);}
+  100%{opacity:1;transform:translateX(0);}
+}
+
+.anim-up    {opacity:0;animation:fadeSlideUp   .65s cubic-bezier(.22,1,.36,1) forwards;}
+.anim-left  {opacity:0;animation:fadeSlideLeft  .65s cubic-bezier(.22,1,.36,1) forwards;}
+.anim-right {opacity:0;animation:fadeSlideRight .65s cubic-bezier(.22,1,.36,1) forwards;}
+.anim-scale {opacity:0;animation:scaleIn        .65s cubic-bezier(.22,1,.36,1) forwards;}
+.anim-glitch{opacity:0;animation:glitchIn       .7s ease forwards;}
+
+.d0{animation-delay:.05s;} .d1{animation-delay:.15s;} .d2{animation-delay:.25s;}
+.d3{animation-delay:.35s;} .d4{animation-delay:.45s;} .d5{animation-delay:.55s;}
+.d6{animation-delay:.65s;} .d7{animation-delay:.75s;} .d8{animation-delay:.85s;}
+
+/* ═══ TOP BAR ═══ */
+.topbar{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.tb-left{display:flex;align-items:center;gap:16px;}
+
+.logo-mark{display:flex;align-items:center;gap:10px;}
+.logo-hex{
+  width:34px;height:34px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--red),var(--orange));
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:#fff;
+  animation:hexPulse 2.8s ease-in-out infinite;
+}
+@keyframes hexPulse{
+  0%,100%{filter:drop-shadow(0 0 5px rgba(239,68,68,.5)) drop-shadow(0 0 2px rgba(239,68,68,.8));}
+  50%{filter:drop-shadow(0 0 16px rgba(239,68,68,1)) drop-shadow(0 0 8px rgba(249,115,22,.6));}
+}
+.logo-text{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:21px;letter-spacing:.08em;
+  background:linear-gradient(90deg,var(--red),var(--orange),var(--red));
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:gradShift 4s linear infinite;
+}
+@keyframes gradShift{0%{background-position:0% center;}100%{background-position:200% center;}}
+.logo-sub{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--txt3);text-transform:uppercase;margin-top:-4px;}
+
+.slide-tag{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;color:#f97316;text-transform:uppercase;
+  padding:4px 11px;border:1px solid rgba(249,115,22,.28);border-radius:20px;background:rgba(249,115,22,.05);
+  animation:tagBreathe 3s ease-in-out infinite;
+}
+@keyframes tagBreathe{0%,100%{border-color:rgba(249,115,22,.28);}50%{border-color:rgba(249,115,22,.55);}}
+
+.tb-center{
+  font-family:'Syne',sans-serif;font-size:17px;font-weight:700;letter-spacing:.02em;
+  display:flex;align-items:center;gap:8px;
+}
+.tb-center .hi{
+  background:linear-gradient(90deg,var(--red),var(--orange));background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:gradShift 5s linear infinite;
+}
+
+.tb-right{display:flex;align-items:center;gap:9px;}
+.alert-pill{
+  display:flex;align-items:center;gap:6px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--red);
+  background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.28);padding:4px 11px;border-radius:20px;text-transform:uppercase;
+  animation:alertBlink 1.4s ease-in-out infinite;
+}
+@keyframes alertBlink{0%,100%{border-color:rgba(239,68,68,.28);box-shadow:none;}50%{border-color:rgba(239,68,68,.6);box-shadow:0 0 12px rgba(239,68,68,.25);}}
+.alert-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1.2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 8px var(--red);}50%{opacity:.15;box-shadow:none;}}
+.round-badge{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#fff;
+  background:linear-gradient(135deg,var(--red2),var(--red));
+  padding:4px 13px;border-radius:20px;text-transform:uppercase;
+  animation:badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 10px rgba(239,68,68,.35);}50%{box-shadow:0 0 24px rgba(239,68,68,.65);}}
+
+/* ═══ HERO ═══ */
+.hero{
+  flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;
+  background:linear-gradient(135deg,rgba(239,68,68,.04),rgba(249,115,22,.03));
+  border:1px solid rgba(239,68,68,.18);border-radius:var(--r2);
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--red),var(--orange));border-radius:1px;
+}
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(239,68,68,.04) 50%,transparent 70%);
+  background-size:200% 100%;
+  animation:shineSweep 4.5s ease-in-out infinite;pointer-events:none;
+}
+@keyframes shineSweep{0%,100%{background-position:-100% 0;}50%{background-position:200% 0;}}
+
+.hero-kicker{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;color:#f97316;text-transform:uppercase;
+  margin-bottom:4px;display:flex;align-items:center;gap:7px;
+}
+.hero-kicker::before{content:'⚠';font-size:9px;animation:blink 1.6s ease infinite;}
+.hero-h{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;line-height:1.2;letter-spacing:-.01em;}
+.hero-h .hi{
+  background:linear-gradient(90deg,var(--red),var(--orange));background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:gradShift 4s linear infinite;
+}
+.hero-sub{font-size:10.5px;color:var(--txt2);margin-top:4px;max-width:620px;line-height:1.55;}
+
+.hero-stats{display:flex;gap:18px;}
+.hs{text-align:center;position:relative;}
+.hs::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:28px;height:2px;border-radius:1px;animation:statLine 2s ease-in-out infinite alternate;}
+.hs:nth-child(1)::after{background:var(--red);}
+.hs:nth-child(2)::after{background:var(--orange);}
+.hs:nth-child(3)::after{background:var(--amber);}
+@keyframes statLine{0%{width:14px;opacity:.4;}100%{width:32px;opacity:1;}}
+.hs-val{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;line-height:1;margin-bottom:2px;}
+.hs-val.r{color:var(--red);text-shadow:0 0 18px rgba(239,68,68,.5);}
+.hs-val.o{color:var(--orange);text-shadow:0 0 18px rgba(249,115,22,.5);}
+.hs-val.a{color:var(--amber);text-shadow:0 0 18px rgba(245,158,11,.5);}
+.hs-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--txt3);text-transform:uppercase;}
+
+/* ═══ TICKER ═══ */
+.ticker-wrap{overflow:hidden;flex-shrink:0;border-top:1px solid rgba(239,68,68,.1);border-bottom:1px solid rgba(239,68,68,.1);background:rgba(239,68,68,.02);padding:3px 0;}
+.ticker{display:flex;gap:0;animation:tickerScroll 28s linear infinite;white-space:nowrap;}
+.ticker-item{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;color:var(--txt3);padding:0 28px;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.ticker-item span{color:#f97316;}
+.ticker-sep{color:var(--txt3);opacity:.3;}
+@keyframes tickerScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+/* ═══ MAIN GRID ═══ */
+.main{display:grid;grid-template-columns:1fr 1.42fr 1fr;gap:9px;min-height:600px;}
+
+/* ═══ PANEL ═══ */
+.panel{
+  background:var(--panel);border:1px solid var(--edge);border-radius:var(--r2);
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+  transition:border-color .3s;
+}
+.panel:hover{border-color:var(--edge2);}
+.panel::before{
+  content:'';position:absolute;top:0;right:0;width:40px;height:40px;
+  background:radial-gradient(circle at 100% 0%,rgba(239,68,68,.06),transparent 70%);
+  pointer-events:none;
+}
+.panel-hd{padding:9px 13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--edge);flex-shrink:0;position:relative;overflow:hidden;}
+.panel-hd::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.02),transparent);
+  background-size:200% 100%;animation:hdShimmer 3s ease-in-out infinite;pointer-events:none;
+}
+@keyframes hdShimmer{0%,100%{background-position:-100% 0;}50%{background-position:200% 0;}}
+.phi{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.phi-r{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);}
+.phi-o{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.28);}
+.phi-a{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);}
+.phi-p{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);}
+.phi-c{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);}
+.phi-g{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);}
+.phd{font-family:'Syne',sans-serif;font-weight:700;font-size:11.5px;}
+.phd-s{font-family:'JetBrains Mono',monospace;font-size:8.5px;margin-top:1px;}
+.r{color:var(--red);} .o{color:var(--orange);} .a{color:var(--amber);}
+.p{color:var(--purple);} .c{color:var(--cyan);} .g{color:var(--green);}
+.s{color:var(--txt2);}
+.panel-bd{padding:10px;flex:1;display:flex;flex-direction:column;gap:7px;overflow:hidden;}
+
+/* ═══ LEFT COL ═══ */
+.left-col{display:flex;flex-direction:column;gap:9px;}
+
+/* Problem Cards */
+.prob-item{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:8px 10px 8px 14px;
+  background:var(--panel2);border:1px solid var(--edge);border-radius:var(--r);
+  position:relative;overflow:hidden;
+  transition:border-color .25s,box-shadow .25s,transform .25s;
+  cursor:default;
+}
+.prob-item:hover{transform:translateX(3px);}
+.prob-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:1px;}
+.pi-r::before{background:linear-gradient(180deg,var(--red),var(--red2));}
+.pi-o::before{background:linear-gradient(180deg,var(--orange),#ea580c);}
+.pi-a::before{background:linear-gradient(180deg,var(--amber),#d97706);}
+.pi-p::before{background:linear-gradient(180deg,var(--purple),var(--purple2));}
+.pi-r:hover{box-shadow:0 4px 20px rgba(239,68,68,.12),0 0 0 1px rgba(239,68,68,.18);}
+.pi-o:hover{box-shadow:0 4px 20px rgba(249,115,22,.1),0 0 0 1px rgba(249,115,22,.15);}
+.pi-a:hover{box-shadow:0 4px 20px rgba(245,158,11,.1),0 0 0 1px rgba(245,158,11,.15);}
+.pi-p:hover{box-shadow:0 4px 20px rgba(168,85,247,.1),0 0 0 1px rgba(168,85,247,.15);}
+.prob-icon{width:26px;height:26px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.prob-body h4{font-size:11px;font-weight:700;margin-bottom:2px;}
+.prob-body p{font-size:9.5px;color:var(--txt2);line-height:1.5;}
+.prob-tag{display:inline-block;margin-top:3px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:4px;}
+.tag-r{background:rgba(239,68,68,.12);color:#fca5a5;}
+.tag-o{background:rgba(249,115,22,.1);color:#fb923c;}
+.tag-a{background:rgba(245,158,11,.1);color:var(--amber);}
+.tag-p{background:rgba(168,85,247,.1);color:#c084fc;}
+
+/* Failure mode cycler */
+.fail-stages{display:flex;flex-direction:column;gap:0;padding-left:4px;}
+.fstage{
+  display:flex;align-items:center;gap:8px;padding:6px 8px;
+  border-left:2px solid rgba(239,68,68,.12);position:relative;
+  transition:background .2s;border-radius:0 6px 6px 0;
+}
+.fstage:hover{background:rgba(239,68,68,.04);}
+.fstage::before{
+  content:'';position:absolute;left:-5px;top:50%;transform:translateY(-50%);
+  width:8px;height:8px;border-radius:50%;border:2px solid;background:var(--bg);
+  transition:box-shadow .3s;
+}
+.fstage:hover::before{box-shadow:0 0 12px currentColor;}
+.fs-r::before{border-color:var(--red);color:var(--red);}
+.fs-o::before{border-color:var(--orange);color:var(--orange);}
+.fs-a::before{border-color:var(--amber);color:var(--amber);}
+.fs-p::before{border-color:var(--purple);color:var(--purple);}
+.fs-g::before{border-color:var(--green);color:var(--green);}
+.fstage-active::before{animation:stagePing 1.5s ease-in-out infinite;}
+@keyframes stagePing{0%,100%{transform:translateY(-50%) scale(1);}50%{transform:translateY(-50%) scale(1.5);}}
+.fstage-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;width:52px;flex-shrink:0;}
+.fstage-name{font-size:10px;font-weight:700;flex:1;}
+.fstage-fx{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--txt3);padding:1px 6px;background:rgba(255,255,255,.04);border-radius:4px;border:1px solid rgba(255,255,255,.06);}
+
+/* ═══ CENTRE COL ═══ */
+.centre-col{display:flex;flex-direction:column;gap:9px;}
+
+/* Scale of problem blocks */
+.scale-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.scale-card{
+  padding:8px 9px;background:var(--panel2);border:1px solid var(--edge);
+  border-radius:var(--r);position:relative;overflow:hidden;
+  transition:border-color .25s,transform .2s;
+}
+.scale-card:hover{transform:translateY(-2px);}
+.scale-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:1px;}
+.sc-r::before{background:linear-gradient(90deg,var(--red),var(--red2));}
+.sc-o::before{background:linear-gradient(90deg,var(--orange),#ea580c);}
+.sc-a::before{background:linear-gradient(90deg,var(--amber),#d97706);}
+.sc-p::before{background:linear-gradient(90deg,var(--purple),var(--purple2));}
+.sc-r:hover{border-color:rgba(239,68,68,.3);box-shadow:0 4px 18px rgba(239,68,68,.1);}
+.sc-o:hover{border-color:rgba(249,115,22,.3);box-shadow:0 4px 18px rgba(249,115,22,.1);}
+.sc-a:hover{border-color:rgba(245,158,11,.3);box-shadow:0 4px 18px rgba(245,158,11,.1);}
+.sc-p:hover{border-color:rgba(168,85,247,.3);box-shadow:0 4px 18px rgba(168,85,247,.1);}
+.sc-val{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;line-height:1.1;margin-bottom:2px;}
+.sc-r .sc-val{color:var(--red);text-shadow:0 0 18px rgba(239,68,68,.4);}
+.sc-o .sc-val{color:var(--orange);text-shadow:0 0 18px rgba(249,115,22,.4);}
+.sc-a .sc-val{color:var(--amber);text-shadow:0 0 18px rgba(245,158,11,.4);}
+.sc-p .sc-val{color:var(--purple);text-shadow:0 0 18px rgba(168,85,247,.4);}
+@keyframes numPop{0%{transform:scale(.7);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.sc-val{animation:numPop .55s cubic-bezier(.22,1,.36,1) both;}
+.sc-r .sc-val{animation-delay:.9s;} .sc-o .sc-val{animation-delay:1s;}
+.sc-a .sc-val{animation-delay:1.1s;} .sc-p .sc-val{animation-delay:1.2s;}
+.sc-lbl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);line-height:1.4;}
+
+/* Gap analysis table */
+.gap-table{display:flex;flex-direction:column;gap:3px;}
+.gap-row{
+  display:flex;align-items:center;gap:6px;padding:5px 8px;
+  background:var(--panel2);border:1px solid var(--edge);border-radius:7px;
+  transition:border-color .2s,transform .2s;
+}
+.gap-row:hover{border-color:rgba(239,68,68,.22);transform:translateX(2px);}
+.gap-label{font-size:9px;color:var(--txt2);flex:1;line-height:1.3;}
+.gap-status{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;border-radius:4px;flex-shrink:0;letter-spacing:.06em;}
+.gs-fail{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.2);}
+.gs-partial{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2);}
+.gs-miss{background:rgba(168,85,247,.1);color:#c084fc;border:1px solid rgba(168,85,247,.2);}
+.gap-icon{font-size:11px;flex-shrink:0;}
+
+/* Canvas */
+canvas#crimec{display:block;width:100%;flex:1;min-height:0;}
+
+/* Flow of failure */
+.fail-flow{display:flex;flex-direction:column;gap:4px;}
+.ff-row{display:flex;align-items:center;gap:5px;}
+.ffnode{
+  flex:1;padding:5px 7px;border-radius:7px;
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;
+  letter-spacing:.03em;text-align:center;border:1px solid;white-space:nowrap;
+  transition:box-shadow .2s,transform .2s;
+}
+.ffnode:hover{transform:translateY(-1px);}
+.ff-r{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.28);color:#fca5a5;}
+.ff-r:hover{box-shadow:0 4px 14px rgba(239,68,68,.22);}
+.ff-o{background:rgba(249,115,22,.07);border-color:rgba(249,115,22,.28);color:#fb923c;}
+.ff-o:hover{box-shadow:0 4px 14px rgba(249,115,22,.18);}
+.ff-a{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.28);color:var(--amber);}
+.ff-p{background:rgba(168,85,247,.07);border-color:rgba(168,85,247,.28);color:#c084fc;}
+.ff-g{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.28);color:var(--green);}
+.ffarr{color:var(--txt3);font-size:11px;flex-shrink:0;}
+.ffloop{
+  font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--txt3);
+  padding:2px 7px;background:rgba(255,255,255,.03);border-radius:4px;border:1px solid var(--edge);white-space:nowrap;
+  animation:loopBlink 2.2s ease-in-out infinite;
+}
+@keyframes loopBlink{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+/* ═══ RIGHT COL ═══ */
+.right-col{display:flex;flex-direction:column;gap:9px;}
+
+/* Impact metrics */
+.impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.impact{
+  padding:9px 10px;background:var(--panel2);border:1px solid var(--edge);
+  border-radius:var(--r);position:relative;overflow:hidden;text-align:center;
+  transition:border-color .25s,transform .2s;
+}
+.impact:hover{transform:translateY(-2px);}
+.impact::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:1px;}
+.ir::before{background:linear-gradient(90deg,var(--red),var(--red2));}
+.io::before{background:linear-gradient(90deg,var(--orange),#ea580c);}
+.ia::before{background:linear-gradient(90deg,var(--amber),#d97706);}
+.ip::before{background:linear-gradient(90deg,var(--purple),var(--purple2));}
+.ir:hover{border-color:rgba(239,68,68,.3);box-shadow:0 6px 20px rgba(239,68,68,.12);}
+.io:hover{border-color:rgba(249,115,22,.3);box-shadow:0 6px 20px rgba(249,115,22,.1);}
+.ia:hover{border-color:rgba(245,158,11,.3);box-shadow:0 6px 20px rgba(245,158,11,.1);}
+.ip:hover{border-color:rgba(168,85,247,.3);box-shadow:0 6px 20px rgba(168,85,247,.1);}
+.impact-val{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;line-height:1.1;margin-bottom:3px;}
+.ir .impact-val{color:var(--red);text-shadow:0 0 18px rgba(239,68,68,.45);}
+.io .impact-val{color:var(--orange);text-shadow:0 0 18px rgba(249,115,22,.4);}
+.ia .impact-val{color:var(--amber);text-shadow:0 0 18px rgba(245,158,11,.4);}
+.ip .impact-val{color:var(--purple);text-shadow:0 0 18px rgba(168,85,247,.4);}
+.impact-val{animation:numPop .55s cubic-bezier(.22,1,.36,1) both;}
+.ir .impact-val{animation-delay:.95s;} .io .impact-val{animation-delay:1.05s;}
+.ia .impact-val{animation-delay:1.15s;} .ip .impact-val{animation-delay:1.25s;}
+.impact-lbl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);line-height:1.4;}
+
+/* Evidence gap bars */
+.ev-pool{display:flex;flex-direction:column;gap:5px;}
+.ev-row{display:flex;align-items:center;gap:6px;}
+.ev-label{font-size:9px;color:var(--txt2);width:112px;flex-shrink:0;line-height:1.3;}
+.ev-bg{flex:1;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden;border:1px solid rgba(255,255,255,.05);}
+.ev-bar{height:100%;border-radius:3px;width:0;transition:width 1.3s cubic-bezier(.22,1,.36,1);}
+.eb-r{background:linear-gradient(90deg,var(--red2),var(--red));}
+.eb-o{background:linear-gradient(90deg,#ea580c,var(--orange));}
+.eb-a{background:linear-gradient(90deg,#d97706,var(--amber));}
+.eb-p{background:linear-gradient(90deg,var(--purple2),var(--purple));}
+.eb-g{background:linear-gradient(90deg,#16a34a,var(--green));}
+.ev-pct{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--txt3);width:28px;text-align:right;flex-shrink:0;}
+.bars-ready .ev-bar{width:var(--w);}
+
+/* Status badges */
+.status-row{display:flex;gap:5px;flex-shrink:0;}
+.status-badge{
+  flex:1;padding:7px 7px;text-align:center;background:var(--panel2);border:1px solid var(--edge);
+  border-radius:var(--r);font-family:'JetBrains Mono',monospace;transition:border-color .25s;
+}
+.status-badge:hover{border-color:rgba(239,68,68,.3);}
+.sb-icon{font-size:13px;margin-bottom:2px;}
+.sb-name{font-size:7.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--txt2);}
+.sb-status{font-size:7.5px;color:var(--red);margin-top:1px;animation:statusFlicker 3.5s ease-in-out infinite;}
+@keyframes statusFlicker{0%,93%,100%{opacity:1;}94%,98%{opacity:.3;}}
+
+/* Callout */
+.callout{
+  padding:9px 12px;background:linear-gradient(135deg,rgba(239,68,68,.05),rgba(249,115,22,.04));
+  border:1px solid rgba(239,68,68,.18);border-radius:var(--r);
+  display:flex;align-items:flex-start;gap:8px;flex-shrink:0;
+  position:relative;overflow:hidden;
+  animation:calloutPulse 4s ease-in-out infinite;
+}
+@keyframes calloutPulse{0%,100%{border-color:rgba(239,68,68,.18);}50%{border-color:rgba(239,68,68,.35);}}
+.callout::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 20%,rgba(239,68,68,.03) 50%,transparent 80%);
+  background-size:200% 100%;animation:shineSweep 5s ease-in-out infinite;pointer-events:none;
+}
+.callout-icon{
+  width:26px;height:26px;border-radius:7px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(249,115,22,.18));
+  border:1px solid rgba(239,68,68,.35);
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  animation:hexPulse 3s ease-in-out infinite;
+}
+.callout-text{font-size:9.5px;color:var(--txt2);line-height:1.55;}
+.callout-text strong{color:var(--red);font-weight:700;}
+
+/* ═══ BOTTOM BAR ═══ */
+.bottombar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:3px 2px;}
+.bb-left{display:flex;align-items:center;gap:12px;}
+.bb-item{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--txt3);text-transform:uppercase;display:flex;align-items:center;gap:4px;}
+.bb-dot{width:5px;height:5px;border-radius:50%;animation:blink 2s ease-in-out infinite;}
+.bb-item:nth-child(1) .bb-dot{background:var(--red);animation-delay:0s;}
+.bb-item:nth-child(2) .bb-dot{background:var(--orange);animation-delay:.3s;}
+.bb-item:nth-child(3) .bb-dot{background:var(--amber);animation-delay:.6s;}
+.bb-item:nth-child(4) .bb-dot{background:var(--purple);animation-delay:.9s;}
+.bb-item:nth-child(5) .bb-dot{background:var(--green);animation-delay:1.2s;}
+.bb-right{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--txt3);letter-spacing:.08em;}
+
+/* Layer arch */
+.arch{display:flex;flex-direction:column;gap:4px;}
+.layer{
+  display:flex;align-items:center;gap:6px;padding:5px 9px;
+  border-radius:var(--r);border:1px solid;
+  position:relative;overflow:hidden;
+  transition:border-color .25s,transform .2s;
+}
+.layer:hover{transform:translateX(2px);}
+.layer::after{content:'▼';position:absolute;right:2px;bottom:-11px;font-size:10px;opacity:.25;z-index:2;}
+.layer:last-child::after{display:none;}
+.layer-sweep{
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.018),transparent);
+  background-size:300% 100%;
+  animation:sweepLayer 3.5s ease-in-out infinite;
+}
+@keyframes sweepLayer{0%,100%{background-position:-100% 0;}50%{background-position:200% 0;}}
+.l1{background:rgba(239,68,68,.03);border-color:rgba(239,68,68,.15);}
+.l1:hover{border-color:rgba(239,68,68,.3);}
+.l2{background:rgba(249,115,22,.03);border-color:rgba(249,115,22,.13);}
+.l2:hover{border-color:rgba(249,115,22,.28);}
+.l3{background:rgba(245,158,11,.04);border-color:rgba(245,158,11,.15);flex:1;}
+.l3:hover{border-color:rgba(245,158,11,.3);}
+.l4{background:rgba(168,85,247,.03);border-color:rgba(168,85,247,.13);}
+.l4:hover{border-color:rgba(168,85,247,.28);}
+.layer-num{
+  font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);
+  white-space:nowrap;flex-shrink:0;align-self:stretch;display:flex;align-items:center;
+  width:13px;padding:2px 0;
+}
+.layer-blocks{display:flex;gap:4px;flex:1;align-items:center;flex-wrap:wrap;}
+.lblock{
+  padding:4px 8px;border-radius:6px;font-size:9px;font-weight:600;
+  white-space:nowrap;border:1px solid;display:flex;align-items:center;gap:3px;
+  font-family:'Space Grotesk',sans-serif;letter-spacing:.01em;
+  transition:transform .2s,box-shadow .2s;
+}
+.lblock:hover{transform:translateY(-1px);}
+.l1 .lblock{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.22);color:#fca5a5;}
+.l1 .lblock:hover{box-shadow:0 3px 10px rgba(239,68,68,.18);}
+.l2 .lblock{background:rgba(249,115,22,.07);border-color:rgba(249,115,22,.2);color:#fb923c;}
+.l2 .lblock:hover{box-shadow:0 3px 10px rgba(249,115,22,.15);}
+.l3 .lblock{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.22);color:#fde68a;}
+.l3 .lblock:hover{box-shadow:0 3px 10px rgba(245,158,11,.15);}
+.l4 .lblock{background:rgba(168,85,247,.07);border-color:rgba(168,85,247,.2);color:#d0b4fe;}
+.l4 .lblock:hover{box-shadow:0 3px 10px rgba(168,85,247,.15);}
+
+/* Glitch text animation */
+@keyframes glitchText{
+  0%,90%,100%{text-shadow:none;}
+  91%{text-shadow:2px 0 rgba(239,68,68,.8),-2px 0 rgba(0,229,255,.8);}
+  93%{text-shadow:-1px 0 rgba(239,68,68,.8),1px 0 rgba(0,229,255,.8);}
+  95%{text-shadow:none;}
+  97%{text-shadow:1px 0 rgba(239,68,68,.6),-1px 0 rgba(0,229,255,.6);}
+}
+.glitch-anim{animation:glitchText 5s ease-in-out infinite;}
+</style>
+</head>
+<body>
+
+<canvas id="bgcanvas"></canvas>
+<div class="bg-glow"></div>
+<div class="scanlines"></div>
+
+<div class="shell">
+
+  <!-- ══ TOP BAR ══ -->
+  <div class="topbar anim-up d0">
+    <div class="tb-left">
+      <div class="logo-mark">
+        <div class="logo-hex">Æ</div>
+        <div>
+          <div class="logo-text glitch-anim">AEGIS</div>
+          <div class="logo-sub">Autonomous Financial Crime Investigation</div>
+        </div>
+      </div>
+      <div class="slide-tag">▸ Slide 01 — Problem</div>
+    </div>
+    <div class="tb-center">
+      <span class="hi">Why Legacy Systems</span> Are Failing
+    </div>
+    <div class="tb-right">
+      <div class="alert-pill"><div class="alert-dot"></div>Critical Gap Detected</div>
+      <div class="round-badge">Round 1 · Presentation</div>
+    </div>
+  </div>
+
+  <!-- ══ HERO ══ -->
+  <div class="hero anim-up d1">
+    <div>
+      <div class="hero-kicker">The Core Problem</div>
+      <div class="hero-h">Financial Crime is <span class="hi">Outpacing</span> Every Defence.</div>
+      <div class="hero-sub">Rule-based AML systems were built for a simpler era. Today's fraud rings exploit multi-hop networks, shell company chains, and velocity patterns that flat SQL ledger scans simply cannot see — leaving ₹3.7 lakh crore in illicit flows undetected annually across India's banking system alone.</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-val r">₹3.7L Cr</div><div class="hs-lbl">Annual Gap (India)</div></div>
+      <div class="hs"><div class="hs-val o">~60%</div><div class="hs-lbl">False Positive Rate</div></div>
+      <div class="hs"><div class="hs-val a">Weeks</div><div class="hs-lbl">Manual Investigation</div></div>
+    </div>
+  </div>
+
+  <!-- ══ TICKER ══ -->
+  <div class="ticker-wrap anim-up d2">
+    <div class="ticker">
+      <div class="ticker-item">Shell company layering<span>undetected by SQL scans</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Multi-hop fund cycles<span>up to 12 hops observed</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">False positives<span>~60% analyst time wasted</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Dormant account activation<span>missed by static rules</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Velocity micro-bursts<span>below threshold split</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Cross-bank layering<span>no graph context</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">STR generation latency<span>days → regulatory risk</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Annual illicit flows (India)<span>₹3.7 lakh crore</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Legacy rule coverage<span>&lt;35% of fraud typologies</span><span class="ticker-sep">·</span></div>
+      <!-- duplicate for seamless loop -->
+      <div class="ticker-item">Shell company layering<span>undetected by SQL scans</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Multi-hop fund cycles<span>up to 12 hops observed</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">False positives<span>~60% analyst time wasted</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Dormant account activation<span>missed by static rules</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Velocity micro-bursts<span>below threshold split</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Cross-bank layering<span>no graph context</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">STR generation latency<span>days → regulatory risk</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Annual illicit flows (India)<span>₹3.7 lakh crore</span><span class="ticker-sep">·</span></div>
+      <div class="ticker-item">Legacy rule coverage<span>&lt;35% of fraud typologies</span><span class="ticker-sep">·</span></div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN 3-COL ══ -->
+  <div class="main">
+
+    <!-- ═══ LEFT ═══ -->
+    <div class="left-col">
+
+      <!-- Problem Pillars -->
+      <div class="panel anim-left d3">
+        <div class="panel-hd">
+          <div class="phi phi-r">⚠</div>
+          <div><div class="phd r">Core Failure Points</div><div class="phd-s s">Where legacy AML breaks down</div></div>
+        </div>
+        <div class="panel-bd">
+          <div class="prob-item pi-r">
+            <div class="prob-icon phi-r">🕳️</div>
+            <div class="prob-body">
+              <h4 class="r">Blind to Graph Topology</h4>
+              <p>SQL rule engines analyse single transactions — completely missing shell networks, circular loops &amp; multi-entity layering schemes.</p>
+              <span class="prob-tag tag-r">No Graph Context</span>
+            </div>
+          </div>
+          <div class="prob-item pi-o">
+            <div class="prob-icon phi-o">📊</div>
+            <div class="prob-body">
+              <h4 class="o">Static Threshold Rules</h4>
+              <p>Hard-coded amount limits &amp; fixed watchlists cannot adapt. Criminals split transactions just below thresholds — trivially evading detection.</p>
+              <span class="prob-tag tag-o">Zero Adaptivity</span>
+            </div>
+          </div>
+          <div class="prob-item pi-a">
+            <div class="prob-icon phi-a">⏳</div>
+            <div class="prob-body">
+              <h4 class="a">Weeks of Manual Work</h4>
+              <p>Every high-risk alert requires hours of analyst time to gather evidence, cross-reference accounts, and compile STR reports manually.</p>
+              <span class="prob-tag tag-a">Operational Cost</span>
+            </div>
+          </div>
+          <div class="prob-item pi-p">
+            <div class="prob-icon phi-p">🔔</div>
+            <div class="prob-body">
+              <h4 class="p">~60% False Positive Rate</h4>
+              <p>Imprecise scoring floods analysts with noise — genuine fraud cases buried under thousands of false alarms every month.</p>
+              <span class="prob-tag tag-p">Alert Fatigue</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Failure mode cycler -->
+      <div class="panel anim-left d4" style="flex:1;min-height:0;">
+        <div class="panel-hd">
+          <div class="phi phi-o">⚙</div>
+          <div><div class="phd o">Legacy System Failure Modes</div><div class="phd-s s">Sequential detection breakdowns</div></div>
+        </div>
+        <div class="panel-bd">
+          <div class="fail-stages">
+            <div class="fstage fs-r fstage-active">
+              <div class="fstage-lbl r">Mode 1</div>
+              <div class="fstage-name">Threshold Evasion</div>
+              <div class="fstage-fx">Split below ₹2L</div>
+            </div>
+            <div class="fstage fs-o">
+              <div class="fstage-lbl o">Mode 2</div>
+              <div class="fstage-name">Shell Layering</div>
+              <div class="fstage-fx">3–12 hop chains</div>
+            </div>
+            <div class="fstage fs-a">
+              <div class="fstage-lbl a">Mode 3</div>
+              <div class="fstage-name">Circular Fund Loop</div>
+              <div class="fstage-fx">Origin obfuscation</div>
+            </div>
+            <div class="fstage fs-p">
+              <div class="fstage-lbl p">Mode 4</div>
+              <div class="fstage-name">Dormant Activation</div>
+              <div class="fstage-fx">Baseline drift</div>
+            </div>
+            <div class="fstage fs-g">
+              <div class="fstage-lbl g">Mode 5</div>
+              <div class="fstage-name">Velocity Micro-Burst</div>
+              <div class="fstage-fx">Time-window exploit</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ CENTRE ═══ -->
+    <div class="centre-col">
+
+      <!-- Scale of problem -->
+      <div class="panel anim-up d3" style="flex:none;">
+        <div class="panel-hd">
+          <div class="phi phi-r">📉</div>
+          <div><div class="phd r">Scale of the Problem</div><div class="phd-s s">Quantified cost of legacy AML failure</div></div>
+        </div>
+        <div class="panel-bd" style="gap:5px;">
+          <div class="scale-grid">
+            <div class="scale-card sc-r"><div class="sc-val">₹3.7L Cr</div><div class="sc-lbl">Illicit Flows<br>Undetected (India/yr)</div></div>
+            <div class="scale-card sc-o"><div class="sc-val">~60%</div><div class="sc-lbl">False Positive<br>Alert Rate</div></div>
+            <div class="scale-card sc-a"><div class="sc-val">12–72h</div><div class="sc-lbl">STR Generation<br>Latency (Manual)</div></div>
+            <div class="scale-card sc-p"><div class="sc-val">&lt;35%</div><div class="sc-lbl">Fraud Typology<br>Coverage (Rules)</div></div>
+          </div>
+          <!-- Fraud typology failure arch -->
+          <div class="arch" style="margin-top:2px;">
+            <div class="layer l1"><div class="layer-sweep"></div>
+              <div class="layer-num r">BLIND SPOT 1</div>
+              <div class="layer-blocks">
+                <div class="lblock">🕳 Shell Networks</div>
+                <div class="lblock">🔄 Circular Loops</div>
+                <div class="lblock">🏦 Cross-Bank Chains</div>
+              </div>
+            </div>
+            <div class="layer l2"><div class="layer-sweep"></div>
+              <div class="layer-num o">BLIND SPOT 2</div>
+              <div class="layer-blocks">
+                <div class="lblock">⚡ Velocity Bursts</div>
+                <div class="lblock">😴 Dormant Accounts</div>
+                <div class="lblock">📅 Time Patterns</div>
+              </div>
+            </div>
+            <div class="layer l3"><div class="layer-sweep"></div>
+              <div class="layer-num a">BLIND SPOT 3</div>
+              <div class="layer-blocks">
+                <div class="lblock">🎭 Identity Masking</div>
+                <div class="lblock">✂ Threshold Splits</div>
+                <div class="lblock">📡 Watchlist Gaps</div>
+              </div>
+            </div>
+            <div class="layer l4"><div class="layer-sweep"></div>
+              <div class="layer-num p">RESULT</div>
+              <div class="layer-blocks">
+                <div class="lblock">⚠ Missed STRs</div>
+                <div class="lblock">🔔 Alert Fatigue</div>
+                <div class="lblock">💸 Regulatory Fines</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- How criminals exploit the gaps — flow -->
+      <div class="panel anim-up d4" style="flex:none;">
+        <div class="panel-hd">
+          <div class="phi phi-o">▶</div>
+          <div><div class="phd o">How Criminals Exploit the Gap</div><div class="phd-s s">Step-by-step evasion of legacy rules</div></div>
+        </div>
+        <div class="panel-bd">
+          <div class="fail-flow">
+            <div class="ff-row">
+              <div class="ffnode ff-r">💰 Illicit Funds Enter</div>
+              <div class="ffarr">→</div>
+              <div class="ffnode ff-o">✂ Split Below Threshold</div>
+              <div class="ffarr">→</div>
+              <div class="ffnode ff-a">🏦 Shell Account A</div>
+            </div>
+            <div class="ff-row" style="padding-left:8px;">
+              <div class="ffloop">Rules see: normal transactions</div>
+              <div class="ffarr">↓</div>
+              <div class="ffnode ff-o" style="flex:none;padding:5px 11px;">🏦 Shell B → Shell C → Shell D</div>
+            </div>
+            <div class="ff-row">
+              <div class="ffnode ff-a">🔄 Funds Return to Origin</div>
+              <div class="ffarr">→</div>
+              <div class="ffnode ff-p">📋 Rules: No Alert</div>
+              <div class="ffarr">→</div>
+              <div class="ffnode ff-r">✅ Money "Laundered"</div>
+            </div>
+            <div class="ff-row" style="padding-left:8px;">
+              <div class="ffloop">Legacy AML: 0 flags raised</div>
+              <div class="ffarr">→</div>
+              <div class="ffnode ff-r" style="flex:none;padding:5px 12px;">❌ STR Never Generated · FIU-IND Blind</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live crime graph canvas -->
+      <div class="panel anim-scale d5" style="flex:1;min-height:0;">
+        <div class="panel-hd">
+          <div class="phi phi-r">⚡</div>
+          <div><div class="phd r">Live Crime Network — Invisible to Rules</div><div class="phd-s s">Multi-hop shell loop: undetected by legacy AML in real time</div></div>
+        </div>
+        <canvas id="crimec"></canvas>
+      </div>
+
+    </div>
+
+    <!-- ═══ RIGHT ═══ -->
+    <div class="right-col">
+
+      <!-- Impact metrics -->
+      <div class="panel anim-right d3" style="flex:none;">
+        <div class="panel-hd">
+          <div class="phi phi-r">📊</div>
+          <div><div class="phd r">Current System Failure Metrics</div><div class="phd-s s">Measured gaps in live deployments</div></div>
+        </div>
+        <div class="panel-bd" style="padding:8px;">
+          <div class="impact-grid">
+            <div class="impact ir"><div class="impact-val">~60%</div><div class="impact-lbl">False<br>Positive Rate</div></div>
+            <div class="impact io"><div class="impact-val">&lt;35%</div><div class="impact-lbl">Fraud<br>Typology Cover</div></div>
+            <div class="impact ia"><div class="impact-val">12–72h</div><div class="impact-lbl">Manual STR<br>Latency</div></div>
+            <div class="impact ip"><div class="impact-val">0-hop</div><div class="impact-lbl">Graph<br>Traversal Depth</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gap analysis — what rules can't detect -->
+      <div class="panel anim-right d4" style="flex:none;">
+        <div class="panel-hd">
+          <div class="phi phi-a">⚖</div>
+          <div><div class="phd a">Detection Gap Analysis</div><div class="phd-s s">What legacy rules miss entirely</div></div>
+        </div>
+        <div class="panel-bd" style="gap:4px;">
+          <div class="gap-table">
+            <div class="gap-row"><div class="gap-icon">🕸️</div><div class="gap-label">Circular shell fund loops (4+ hops)</div><div class="gap-status gs-fail">BLIND</div></div>
+            <div class="gap-row"><div class="gap-icon">⏱️</div><div class="gap-label">Dormant-to-active velocity switch</div><div class="gap-status gs-fail">BLIND</div></div>
+            <div class="gap-row"><div class="gap-icon">✂</div><div class="gap-label">Sub-threshold transaction splitting</div><div class="gap-status gs-partial">PARTIAL</div></div>
+            <div class="gap-row"><div class="gap-icon">🌐</div><div class="gap-label">Cross-entity network traversal</div><div class="gap-status gs-miss">MISSED</div></div>
+            <div class="gap-row"><div class="gap-icon">🎭</div><div class="gap-label">Synthetic identity clustering</div><div class="gap-status gs-miss">MISSED</div></div>
+            <div class="gap-row"><div class="gap-icon">📡</div><div class="gap-label">Behavioural baseline drift</div><div class="gap-status gs-partial">PARTIAL</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analyst burden bars -->
+      <div class="panel anim-right d5" style="flex:none;" id="ev-panel">
+        <div class="panel-hd">
+          <div class="phi phi-o">📋</div>
+          <div><div class="phd o">Analyst Burden by Category</div><div class="phd-s s">% time spent on false positives</div></div>
+        </div>
+        <div class="panel-bd" id="ev-bd">
+          <div class="ev-pool">
+            <div class="ev-row"><div class="ev-label">Manual Alert Review</div><div class="ev-bg"><div class="ev-bar eb-r" style="--w:88%"></div></div><div class="ev-pct">88%</div></div>
+            <div class="ev-row"><div class="ev-label">Evidence Gathering</div><div class="ev-bg"><div class="ev-bar eb-o" style="--w:74%"></div></div><div class="ev-pct">74%</div></div>
+            <div class="ev-row"><div class="ev-label">Cross-Account Tracing</div><div class="ev-bg"><div class="ev-bar eb-a" style="--w:65%"></div></div><div class="ev-pct">65%</div></div>
+            <div class="ev-row"><div class="ev-label">STR Report Writing</div><div class="ev-bg"><div class="ev-bar eb-p" style="--w:52%"></div></div><div class="ev-pct">52%</div></div>
+            <div class="ev-row"><div class="ev-label">Actual Fraud Cases</div><div class="ev-bg"><div class="ev-bar eb-g" style="--w:12%"></div></div><div class="ev-pct">12%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regulatory exposure -->
+      <div class="panel anim-right d6" style="flex:1;min-height:0;">
+        <div class="panel-hd">
+          <div class="phi phi-r">🚨</div>
+          <div><div class="phd r">Regulatory Exposure</div><div class="phd-s s">Consequences of current blind spots</div></div>
+        </div>
+        <div class="panel-bd">
+          <div class="status-row">
+            <div class="status-badge"><div class="sb-icon">🏦</div><div class="sb-name">RBI / FIU-IND</div><div class="sb-status">✗ STR Gaps</div></div>
+            <div class="status-badge"><div class="sb-icon">🌐</div><div class="sb-name">FATF AML</div><div class="sb-status">✗ Coverage Risk</div></div>
+            <div class="status-badge"><div class="sb-icon">⚖</div><div class="sb-name">Audit Trail</div><div class="sb-status">✗ Incomplete</div></div>
+          </div>
+          <div class="callout">
+            <div class="callout-icon">⚠</div>
+            <div class="callout-text"><strong>The gap is widening:</strong> Criminal networks grow more sophisticated every month while legacy rule engines sit static — creating a compounding detection deficit that no threshold adjustment can close.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ BOTTOM BAR ══ -->
+  <div class="bottombar anim-up d7">
+    <div class="bb-left">
+      <div class="bb-item"><div class="bb-dot" style="background:var(--red)"></div>Zero Graph Awareness</div>
+      <div class="bb-item"><div class="bb-dot" style="background:var(--orange)"></div>Static Rule Evasion</div>
+      <div class="bb-item"><div class="bb-dot" style="background:var(--amber)"></div>60% False Positives</div>
+      <div class="bb-item"><div class="bb-dot" style="background:var(--purple)"></div>No Temporal Intelligence</div>
+      <div class="bb-item"><div class="bb-dot" style="background:var(--green)"></div>Days of Manual STR Lag</div>
+    </div>
+    <div class="bb-right">AEGIS · Autonomous Financial Crime Investigation · Round 2 Presentation</div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   1. BACKGROUND PARTICLE FIELD (RED)
+═══════════════════════════════════ */
+(function(){
+  const c=document.getElementById('bgcanvas');
+  const x=c.getContext('2d');
+  let W,H;
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const DOTS=[];
+  const COL=['rgba(239,68,68,','rgba(249,115,22,','rgba(245,158,11,'];
+  for(let i=0;i<65;i++){
+    DOTS.push({
+      x:Math.random()*1920,y:Math.random()*1080,
+      vx:(Math.random()-.5)*.16,vy:(Math.random()-.5)*.16,
+      r:Math.random()*1.4+.4,
+      col:COL[Math.floor(Math.random()*3)],
+      a:Math.random()*.2+.05
+    });
+  }
+  function frame(){
+    x.clearRect(0,0,W,H);
+    for(let i=0;i<DOTS.length;i++){
+      for(let j=i+1;j<DOTS.length;j++){
+        const dx=DOTS[i].x-DOTS[j].x,dy=DOTS[i].y-DOTS[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<130){
+          x.beginPath();x.moveTo(DOTS[i].x,DOTS[i].y);x.lineTo(DOTS[j].x,DOTS[j].y);
+          x.strokeStyle=`rgba(239,68,68,${.1*(1-d/130)})`;x.lineWidth=.5;x.stroke();
+        }
+      }
+    }
+    DOTS.forEach(d=>{
+      d.x+=d.vx;d.y+=d.vy;
+      if(d.x<0)d.x=W;if(d.x>W)d.x=0;
+      if(d.y<0)d.y=H;if(d.y>H)d.y=0;
+      x.beginPath();x.arc(d.x,d.y,d.r,0,Math.PI*2);
+      x.fillStyle=d.col+d.a+')';x.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+/* ═══════════════════════════════════
+   2. CRIME NETWORK GRAPH (CENTRE)
+═══════════════════════════════════ */
+(function(){
+  const canvas=document.getElementById('crimec');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){
+    const r=canvas.getBoundingClientRect();
+    W=r.width;H=r.height;
+    canvas.width=W*devicePixelRatio;
+    canvas.height=H*devicePixelRatio;
+    ctx.scale(devicePixelRatio,devicePixelRatio);
+  }
+  resize();
+  new ResizeObserver(resize).observe(canvas);
+
+  // Crime network nodes — shell loop that rules miss
+  const nodes=[
+    {id:'ORIGIN', x:.16,y:.50,r:24,type:'origin',  label:'ORIGIN',  sub:'Illicit Src'},
+    {id:'SHELL_A',x:.38,y:.15,r:18,type:'shell',   label:'SHELL A', sub:'Account'},
+    {id:'SHELL_B',x:.70,y:.18,r:18,type:'shell',   label:'SHELL B', sub:'Account'},
+    {id:'SHELL_C',x:.82,y:.54,r:18,type:'shell',   label:'SHELL C', sub:'Account'},
+    {id:'SHELL_D',x:.60,y:.82,r:18,type:'shell',   label:'SHELL D', sub:'Account'},
+    {id:'CLEAN_1',x:.32,y:.72,r:13,type:'normal',  label:'CLEAN 1', sub:'Legitimate'},
+    {id:'CLEAN_2',x:.50,y:.46,r:13,type:'normal',  label:'CLEAN 2', sub:'Legitimate'},
+    {id:'CLEAN_3',x:.88,y:.82,r:11,type:'normal',  label:'CLEAN 3', sub:'Legitimate'},
+  ];
+  const edges=[
+    {from:'ORIGIN', to:'SHELL_A',type:'criminal',amount:'₹1.8L'},
+    {from:'SHELL_A',to:'SHELL_B',type:'criminal',amount:'₹1.7L'},
+    {from:'SHELL_B',to:'SHELL_C',type:'criminal',amount:'₹1.6L'},
+    {from:'SHELL_C',to:'SHELL_D',type:'criminal',amount:'₹1.5L'},
+    {from:'SHELL_D',to:'ORIGIN', type:'loop',    amount:'₹1.5L'},
+    {from:'CLEAN_1',to:'CLEAN_2',type:'normal',  amount:'₹0.6L'},
+    {from:'ORIGIN', to:'CLEAN_1',type:'normal',  amount:'₹0.4L'},
+    {from:'SHELL_C',to:'CLEAN_3',type:'normal',  amount:'₹0.2L'},
+  ];
+  const COL={
+    origin: {fill:'rgba(239,68,68,.18)',  stroke:'#ef4444',text:'#fca5a5'},
+    shell:  {fill:'rgba(249,115,22,.14)', stroke:'#f97316',text:'#fdba74'},
+    normal: {fill:'rgba(34,197,94,.07)',  stroke:'#22c55e',text:'#86efac'},
+  };
+
+  const gn=id=>nodes.find(n=>n.id===id);
+  const nx=n=>n.x*W;
+  const ny=n=>n.y*H;
+
+  const PARTS=[];
+  edges.forEach(e=>{
+    const c=e.type==='normal'?1:4;
+    for(let i=0;i<c;i++){
+      PARTS.push({edge:e,progress:i/c,speed:e.type==='normal'?.003:.006,sz:e.type==='normal'?3:5});
+    }
+  });
+
+  function ctrl(fn,tn,type){
+    const mx=(nx(fn)+nx(tn))/2,my=(ny(fn)+ny(tn))/2;
+    const bend=type==='loop'?72:36;
+    const dx=nx(tn)-nx(fn),dy=ny(tn)-ny(fn),len=Math.sqrt(dx*dx+dy*dy)||1;
+    return{x:mx-dy/len*bend,y:my+dx/len*bend};
+  }
+  function qpt(p0,c,p2,t){
+    const m=1-t;
+    return{x:m*m*p0.x+2*m*t*c.x+t*t*p2.x,y:m*m*p0.y+2*m*t*c.y+t*t*p2.y};
+  }
+  function ah(x,y,a,col,s){
+    ctx.save();ctx.translate(x,y);ctx.rotate(a);
+    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-s,-s*.55);ctx.lineTo(-s,s*.55);
+    ctx.closePath();ctx.fillStyle=col;ctx.fill();ctx.restore();
+  }
+
+  // Ripple system on origin node
+  const ripples=[];
+  function addRipple(x,y,col){ripples.push({x,y,r:0,col,a:.65});}
+  setInterval(()=>{
+    const origin=gn('ORIGIN');
+    if(origin)addRipple(nx(origin),ny(origin),'rgba(239,68,68,');
+  },1800);
+
+  let tick=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    tick+=0.038;
+
+    // dark bg + grid
+    ctx.fillStyle='rgba(4,8,20,.96)';ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(239,68,68,.022)';ctx.lineWidth=.7;
+    for(let xx=0;xx<W;xx+=40){ctx.beginPath();ctx.moveTo(xx,0);ctx.lineTo(xx,H);ctx.stroke();}
+    for(let yy=0;yy<H;yy+=40){ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(W,yy);ctx.stroke();}
+
+    // ripples
+    for(let i=ripples.length-1;i>=0;i--){
+      const rp=ripples[i];
+      rp.r+=1.3;rp.a-=.014;
+      if(rp.a<=0){ripples.splice(i,1);continue;}
+      ctx.beginPath();ctx.arc(rp.x,rp.y,rp.r,0,Math.PI*2);
+      ctx.strokeStyle=rp.col+rp.a+')';ctx.lineWidth=1.4;ctx.stroke();
+    }
+
+    // draw edges
+    edges.forEach(edge=>{
+      const fn=gn(edge.from),tn=gn(edge.to);if(!fn||!tn)return;
+      const c=ctrl(fn,tn,edge.type);
+      const isCrime=edge.type==='criminal'||edge.type==='loop';
+      // glow
+      ctx.beginPath();ctx.moveTo(nx(fn),ny(fn));ctx.quadraticCurveTo(c.x,c.y,nx(tn),ny(tn));
+      ctx.strokeStyle=isCrime?'rgba(239,68,68,.07)':'rgba(34,197,94,.04)';
+      ctx.lineWidth=isCrime?7:4;ctx.setLineDash([]);ctx.stroke();
+      // main line
+      ctx.beginPath();ctx.moveTo(nx(fn),ny(fn));ctx.quadraticCurveTo(c.x,c.y,nx(tn),ny(tn));
+      ctx.strokeStyle=isCrime?'rgba(239,68,68,.28)':'rgba(34,197,94,.16)';
+      ctx.lineWidth=isCrime?2:1.4;
+      ctx.setLineDash(isCrime?[7,5]:[4,6]);ctx.stroke();ctx.setLineDash([]);
+      // arrow
+      const tp=qpt({x:nx(fn),y:ny(fn)},c,{x:nx(tn),y:ny(tn)},.91);
+      const tp1=qpt({x:nx(fn),y:ny(fn)},c,{x:nx(tn),y:ny(tn)},.90);
+      ah(tp.x,tp.y,Math.atan2(tp.y-tp1.y,tp.x-tp1.x),isCrime?'#ef4444':'#22c55e',isCrime?7:5);
+      // amount label
+      const lp=qpt({x:nx(fn),y:ny(fn)},c,{x:nx(tn),y:ny(tn)},.5);
+      const bw=40,bh=13;
+      ctx.fillStyle='rgba(3,7,18,.9)';
+      ctx.strokeStyle=isCrime?'rgba(239,68,68,.35)':'rgba(34,197,94,.25)';ctx.lineWidth=.8;
+      ctx.beginPath();ctx.roundRect(lp.x-bw/2,lp.y-bh/2,bw,bh,4);ctx.fill();ctx.stroke();
+      ctx.fillStyle=isCrime?'#ef4444':'#22c55e';
+      ctx.font='7px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(edge.amount,lp.x,lp.y);
+    });
+
+    // particles
+    PARTS.forEach(p=>{
+      p.progress+=p.speed;if(p.progress>1)p.progress=0;
+      const fn=gn(p.edge.from),tn=gn(p.edge.to);if(!fn||!tn)return;
+      const c=ctrl(fn,tn,p.edge.type),pt=qpt({x:nx(fn),y:ny(fn)},c,{x:nx(tn),y:ny(tn)},p.progress);
+      const isCrime=p.edge.type!=='normal';
+      ctx.beginPath();ctx.arc(pt.x,pt.y,p.sz+2.5,0,Math.PI*2);
+      ctx.fillStyle=isCrime?'rgba(239,68,68,.09)':'rgba(34,197,94,.07)';ctx.fill();
+      ctx.beginPath();ctx.arc(pt.x,pt.y,p.sz/2,0,Math.PI*2);
+      ctx.fillStyle=isCrime?'rgba(239,68,68,.95)':'rgba(34,197,94,.85)';
+      ctx.shadowColor=isCrime?'#ef4444':'#22c55e';ctx.shadowBlur=10;
+      ctx.fill();ctx.shadowBlur=0;
+    });
+
+    // draw nodes
+    nodes.forEach(n=>{
+      const x=nx(n),y=ny(n),r=n.r,c=COL[n.type]||COL.normal;
+      if(n.type==='origin'){
+        [r+7+Math.sin(tick)*5,r+15+Math.sin(tick+1)*3].forEach((pr,i)=>{
+          ctx.beginPath();ctx.arc(x,y,pr,0,Math.PI*2);
+          ctx.strokeStyle=`rgba(239,68,68,${i===0?.28:.12})`;ctx.lineWidth=1.4;ctx.stroke();
+        });
+      }
+      if(n.type==='shell'){
+        ctx.beginPath();ctx.arc(x,y,r+5,0,Math.PI*2);
+        ctx.strokeStyle='rgba(249,115,22,.2)';ctx.lineWidth=1.2;ctx.stroke();
+      }
+      ctx.shadowColor=c.stroke;ctx.shadowBlur=n.type==='origin'?22:10;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=c.fill;ctx.fill();ctx.shadowBlur=0;
+      ctx.strokeStyle=c.stroke;ctx.lineWidth=n.type==='origin'?2.4:1.8;ctx.stroke();
+      ctx.font=`${n.type==='origin'?'700':'600'} 8px JetBrains Mono,monospace`;
+      ctx.fillStyle=c.text;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(n.label,x,y-5.5);
+      ctx.font='6.5px JetBrains Mono,monospace';ctx.fillStyle=c.stroke;
+      ctx.fillText(n.sub,x,y+5.5);
+      // badges
+      if(n.type==='origin'){
+        ctx.beginPath();ctx.arc(x+r-5,y-r+5,6,0,Math.PI*2);
+        ctx.fillStyle='#ef4444';ctx.shadowColor='#ef4444';ctx.shadowBlur=14;ctx.fill();ctx.shadowBlur=0;
+        ctx.font='bold 8px sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText('!',x+r-5,y-r+5);
+      }
+      if(n.type==='shell'){
+        ctx.beginPath();ctx.arc(x+r-4,y-r+4,5,0,Math.PI*2);
+        ctx.fillStyle='#f97316';ctx.shadowColor='#f97316';ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
+        ctx.font='bold 7px sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText('S',x+r-4,y-r+4);
+      }
+    });
+
+    // "UNDETECTED" pulsing label in the loop centre
+    const shellNodes=['SHELL_A','SHELL_B','SHELL_C','SHELL_D'].map(id=>gn(id)).filter(Boolean);
+    if(shellNodes.length===4){
+      const cx=shellNodes.reduce((s,n)=>s+nx(n),0)/4;
+      const cy=shellNodes.reduce((s,n)=>s+ny(n),0)/4;
+      const a=.5+Math.sin(tick)*.14;
+      const pw=100,ph=30;
+      ctx.fillStyle=`rgba(239,68,68,${a*.1})`;
+      ctx.strokeStyle=`rgba(239,68,68,${a*.4})`;ctx.lineWidth=1;
+      ctx.beginPath();ctx.roundRect(cx-pw/2,cy-ph/2,pw,ph,8);ctx.fill();ctx.stroke();
+      ctx.font=`bold 10px JetBrains Mono,monospace`;
+      ctx.fillStyle=`rgba(239,68,68,${a})`;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('⚠ UNDETECTED',cx,cy-5);
+      ctx.font='7.5px JetBrains Mono,monospace';ctx.fillStyle=`rgba(239,68,68,${a*.6})`;
+      ctx.fillText('loop · rules: 0 alerts',cx,cy+7);
+    }
+
+    // legend
+    const lg=[['#ef4444','Criminal'],['#f97316','Shell Co.'],['#22c55e','Legitimate']];
+    lg.forEach(([col,lbl],i)=>{
+      const lx=10,ly=H-26+(i*14);
+      ctx.beginPath();ctx.arc(lx+4,ly,4,0,Math.PI*2);ctx.fillStyle=col;
+      ctx.shadowColor=col;ctx.shadowBlur=6;ctx.fill();ctx.shadowBlur=0;
+      ctx.font='7.5px JetBrains Mono,monospace';ctx.fillStyle='rgba(180,200,255,.5)';
+      ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(lbl,lx+12,ly);
+    });
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ═══════════════════════════════════
+   3. EVIDENCE BARS — animate on load
+═══════════════════════════════════ */
+setTimeout(()=>{
+  const bd=document.getElementById('ev-bd');
+  if(bd)bd.classList.add('bars-ready');
+},750);
+
+/* ═══════════════════════════════════
+   4. FAILURE MODE CYCLER
+═══════════════════════════════════ */
+(function(){
+  const stages=document.querySelectorAll('.fstage');
+  if(!stages.length)return;
+  let cur=0;
+  function next(){
+    stages.forEach(s=>s.classList.remove('fstage-active'));
+    stages[cur].classList.add('fstage-active');
+    cur=(cur+1)%stages.length;
+  }
+  next();
+  setInterval(next,1900);
+})();
+
+/* ═══════════════════════════════════
+   5. ANIMATED STAT COUNTER (hero)
+═══════════════════════════════════ */
+(function(){
+  // Animate the false-positive % from 0 to 60
+  const el=document.querySelector('.hs-val.o');
+  if(!el)return;
+  let v=0;
+  const target=60;
+  const step=()=>{v=Math.min(v+1.5,target);el.textContent=`~${Math.round(v)}%`;if(v<target)requestAnimationFrame(step);};
+  setTimeout(step,600);
+})();
+</script>
+</body>
+</html>

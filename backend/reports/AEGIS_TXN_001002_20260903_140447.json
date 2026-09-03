@@ -1,0 +1,63 @@
+{
+  "aegis_version": "1.0.0",
+  "report_id": "AEGIS_TXN_001002_20260903_140447",
+  "generated_at": "2026-09-03T14:04:47.465896",
+  "transaction": {
+    "txn_id": "TXN_001002",
+    "sender_id": "ACC_0019",
+    "receiver_id": "ACC_0044",
+    "amount_inr": 15000.0,
+    "timestamp": "2025-06-16 10:00:00"
+  },
+  "decision": {
+    "outcome": "APPROVE",
+    "p_fraud": 0.12,
+    "confidence_pct": 88.0,
+    "threshold_used": 0.85,
+    "reason": "P(fraud|evidence) = 0.120 below decision boundary theta=0.85. Insufficient evidence to flag -- transaction approved and logged."
+  },
+  "investigation": {
+    "total_evidence_sources": 0,
+    "sources_queried": [],
+    "belief_updates": 0,
+    "p_fraud_initial": 0.12,
+    "p_fraud_final": 0.12,
+    "belief_history": [
+      {
+        "p_fraud": 0.12
+      }
+    ],
+    "query_log": []
+  },
+  "evidence": {
+    "anomalies_detected": [],
+    "anomaly_count": 0,
+    "graph": {
+      "is_circular": null,
+      "circular_length": null,
+      "ring_members": [],
+      "shell_chain_length": null,
+      "shell_chain_path": [],
+      "reachable_accounts": null,
+      "reachable_watchlisted": null,
+      "total_flow_amount_inr": null,
+      "graph_risk_score": null
+    },
+    "temporal": {
+      "velocity_burst": null,
+      "velocity_burst_count": null,
+      "dormant_reactivation": null,
+      "dormancy_days": null,
+      "round_trip_detected": null,
+      "round_trip_hours": null,
+      "threshold_split_pattern": null,
+      "temporal_risk_score": null
+    },
+    "xgboost": {
+      "risk_prior": 0.12,
+      "raw_score": -2.0,
+      "top_features": []
+    }
+  },
+  "compliance": null
+}
