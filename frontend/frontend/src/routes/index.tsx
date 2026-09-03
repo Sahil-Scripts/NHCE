@@ -2476,6 +2476,7 @@ function Dashboard() {
 
   // Client-side uploaded CSVs
   const [uploadedStatements, setUploadedStatements] = useState<AccountStatement[]>([]);
+  const [removedFileNames, setRemovedFileNames] = useState<Set<string>>(new Set());
   const [useImportedOnly, setUseImportedOnly] = useState(false);
   const [showSelectedOnlyInColumn, setShowSelectedOnlyInColumn] = useState(false);
   const [lastSelectedIdx, setLastSelectedIdx] = useState<number | null>(null);
@@ -2486,11 +2487,11 @@ function Dashboard() {
 
   // When custom files are imported or default files are removed, only show uploaded files!
   const accountStatements = useMemo<AccountStatement[]>(() => {
-    if (useImportedOnly || uploadedStatements.length > 0) {
-      return uploadedStatements;
-    }
-    return serverStatements;
-  }, [serverStatements, uploadedStatements, useImportedOnly]);
+    const base = (useImportedOnly || uploadedStatements.length > 0)
+      ? uploadedStatements
+      : serverStatements;
+    return base.filter((s) => !removedFileNames.has(s.name));
+  }, [serverStatements, uploadedStatements, useImportedOnly, removedFileNames]);
 
   function parseAndAddFiles(files: FileList | File[]) {
     const arr = Array.from(files).filter(
@@ -2535,7 +2536,12 @@ function Dashboard() {
     }
   }
 
-  function removeUploadedStatement(name: string) {
+  function handleRemoveStatement(name: string) {
+    setRemovedFileNames((prev) => {
+      const next = new Set(prev);
+      next.add(name);
+      return next;
+    });
     setUploadedStatements((prev) => prev.filter((s) => s.name !== name));
     setSelectedFileNames((prev) => {
       const next = new Set(prev);
@@ -2547,6 +2553,39 @@ function Dashboard() {
       delete next[name];
       return next;
     });
+    if (previewStatementName === name) {
+      const remaining = accountStatements.filter((s) => s.name !== name);
+      if (remaining[0]) {
+        setPreviewStatementName(remaining[0].name);
+      }
+    }
+  }
+
+  function handleRemoveSelectedStatements() {
+    const toRemove = Array.from(selectedFileNames);
+    if (!toRemove.length) return;
+    setRemovedFileNames((prev) => {
+      const next = new Set(prev);
+      toRemove.forEach((name) => next.add(name));
+      return next;
+    });
+    setUploadedStatements((prev) => prev.filter((s) => !selectedFileNames.has(s.name)));
+    setSelectedFileNames(new Set());
+    toRemove.forEach((name) => {
+      setUploadProgress((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    });
+  }
+
+  function handleRestoreRemovedStatements() {
+    setRemovedFileNames(new Set());
+  }
+
+  function removeUploadedStatement(name: string) {
+    handleRemoveStatement(name);
   }
   const [previewStatementName, setPreviewStatementName] = useState(serverStatements[0]?.name ?? "");
   const [selectedFileNames, setSelectedFileNames] = useState(
@@ -3150,7 +3189,7 @@ function Dashboard() {
 
           {/* Multi-Selection Action Toolbar */}
           <div className="flex items-center justify-between border-b border-border bg-muted/30 px-3 py-1 text-[11px]">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 onClick={() => {
                   const allVisibleNames = visibleAccountStatementFiles.map((f) => f.name);
@@ -3185,8 +3224,34 @@ function Dashboard() {
               >
                 Invert
               </button>
+              {selectedFileCount > 0 && (
+                <>
+                  <span className="text-muted-foreground">&bull;</span>
+                  <button
+                    onClick={handleRemoveSelectedStatements}
+                    className="text-gov-red hover:underline text-[10px] font-semibold flex items-center gap-0.5"
+                    title={`Remove ${selectedFileCount} selected file(s)`}
+                  >
+                    <Trash2 className="h-2.5 w-2.5" />
+                    <span>Remove ({selectedFileCount})</span>
+                  </button>
+                </>
+              )}
+              {removedFileNames.size > 0 && (
+                <>
+                  <span className="text-muted-foreground">&bull;</span>
+                  <button
+                    onClick={handleRestoreRemovedStatements}
+                    className="text-navy hover:underline text-[10px] font-semibold flex items-center gap-0.5"
+                    title="Restore all previously removed files"
+                  >
+                    <RefreshCw className="h-2.5 w-2.5" />
+                    <span>Restore ({removedFileNames.size})</span>
+                  </button>
+                </>
+              )}
             </div>
-            <span className="text-[10px] text-muted-foreground opacity-80" title="Hold Shift and click another checkbox to select an entire range">
+            <span className="text-[10px] text-muted-foreground opacity-80 shrink-0 ml-1" title="Hold Shift and click another checkbox to select an entire range">
               Shift+Click: Range
             </span>
           </div>
@@ -3209,7 +3274,19 @@ function Dashboard() {
                 ) : (
                   <div>
                     <p className="font-semibold text-foreground">No accounts found.</p>
-                    <p className="text-[11px] mt-1">Drop CSV files below to import.</p>
+                    {removedFileNames.size > 0 ? (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-[11px] text-muted-foreground">{removedFileNames.size} file(s) removed.</p>
+                        <button
+                          onClick={handleRestoreRemovedStatements}
+                          className="text-[11px] font-semibold text-navy underline"
+                        >
+                          Restore Removed Files
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] mt-1">Drop CSV files below to import.</p>
+                    )}
                   </div>
                 )}
               </li>
@@ -3217,7 +3294,7 @@ function Dashboard() {
               visibleAccountStatementFiles.map((f, idx) => (
                 <li key={f.name}>
                   <div
-                    className={`flex min-h-10 cursor-pointer items-center justify-between gap-2 px-3 py-1.5 hover:bg-muted/70 ${
+                    className={`group flex min-h-10 cursor-pointer items-center justify-between gap-2 px-3 py-1.5 hover:bg-muted/70 transition-colors ${
                       previewStatementName === f.name && activeView === "Account Statements" ? "bg-muted" : ""
                     }`}
                     title="Double-click to view CSV statement"
@@ -3272,6 +3349,18 @@ function Dashboard() {
                         </div>
                       </div>
                     </label>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleRemoveStatement(f.name);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 hover:opacity-100 p-1 text-muted-foreground hover:text-gov-red transition-opacity rounded hover:bg-muted/80"
+                      title={`Remove ${f.name} from list`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </li>
               ))
