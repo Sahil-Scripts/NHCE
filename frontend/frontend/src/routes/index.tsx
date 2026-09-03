@@ -2611,6 +2611,7 @@ function Dashboard() {
 
   // Backend Diagnostics State
   const [backendModalOpen, setBackendModalOpen] = useState(false);
+  const [aegisInfoOpen, setAegisInfoOpen] = useState(false);
   const [diagnosticsData, setDiagnosticsData] = useState<any>(null);
   const [isTestingBackend, setIsTestingBackend] = useState(false);
   const [diagnosticsError, setDiagnosticsError] = useState<string | null>(null);
@@ -2878,14 +2879,46 @@ function Dashboard() {
       {/* TOP HEADER */}
       <header className="flex items-center justify-between border-b border-border bg-card px-6 py-2.5">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center border border-border bg-navy text-navy-foreground">
-            <Shield className="h-6 w-6" strokeWidth={1.5} />
-          </div>
+          <button
+            type="button"
+            onClick={() => setAegisInfoOpen(true)}
+            className="group relative flex h-11 w-11 items-center justify-center border border-border bg-navy text-navy-foreground hover:bg-navy-deep active:scale-95 transition-all shadow-xs cursor-pointer"
+            title="Click to view AEGIS Full Form & System Architecture Pillars"
+          >
+            <Shield className="h-6 w-6 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-saffron opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-saffron"></span>
+            </span>
+          </button>
           <div className="leading-tight">
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-saffron">Government of India · FIU-IND</div>
-            <div className="text-xl font-black text-navy tracking-tight">AEGIS</div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-saffron">Government of India · FIU-IND</span>
+              <button
+                type="button"
+                onClick={() => setAegisInfoOpen(true)}
+                className="inline-flex items-center gap-1 text-[10px] bg-navy/10 hover:bg-navy/20 text-navy font-mono font-bold px-1.5 py-0.5 rounded border border-navy/25 transition-colors cursor-pointer"
+                title="View Full Form & A.E.G.I.S. Breakdown"
+              >
+                <Info className="h-2.5 w-2.5 text-navy" />
+                <span>Full Form &amp; Pillars</span>
+              </button>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <button
+                type="button"
+                onClick={() => setAegisInfoOpen(true)}
+                className="text-xl font-black text-navy tracking-tight hover:text-navy-deep cursor-pointer text-left"
+                title="Click to view AEGIS Full Form"
+              >
+                AEGIS
+              </button>
+              <div className="text-[11px] font-semibold text-muted-foreground hidden sm:inline">
+                Autonomous Entropy-guided Graph Investigation System
+              </div>
+            </div>
           </div>
-          <div className="mx-5 h-9 w-px bg-border" />
+          <div className="mx-4 h-9 w-px bg-border" />
           <div className="leading-tight">
             <h1 className="text-base font-semibold text-foreground">Transaction Flow Analysis</h1>
             <p className="text-xs text-muted-foreground">Autonomous AML Forensics &amp; Financial Crime Intelligence</p>
@@ -4529,6 +4562,146 @@ function Dashboard() {
                 className="border border-border bg-background px-4 py-1.5 font-semibold text-foreground hover:bg-muted"
               >
                 Close Console
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AEGIS FULL FORM & ARCHITECTURE PILLARS MODAL */}
+      {aegisInfoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="flex w-full max-w-3xl flex-col border border-border bg-card shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-border bg-navy px-6 py-4 text-white">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center bg-white/10 text-saffron border border-white/20">
+                  <Shield className="h-6 w-6" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-black tracking-wide">A.E.G.I.S.</h2>
+                    <span className="bg-saffron text-navy text-[10px] font-black uppercase px-1.5 py-0.5 rounded tracking-wider">
+                      Full Form &amp; Architecture
+                    </span>
+                  </div>
+                  <p className="text-xs text-white/80 font-medium mt-0.5">
+                    Autonomous Entropy-guided Graph Investigation System
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAegisInfoOpen(false)}
+                className="text-white/70 hover:text-white p-1 hover:bg-white/10 rounded transition-colors cursor-pointer"
+                title="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+              <div className="border-l-4 border-saffron bg-muted/40 p-3.5 text-xs text-muted-foreground leading-relaxed">
+                <span className="font-bold text-foreground">A.E.G.I.S.</span> is an autonomous, closed-loop financial crime investigation and forensics platform designed for <span className="font-semibold text-foreground">FIU-IND</span> statutory compliance. It replaces rigid legacy SQL threshold rules with Shannon entropy-guided graph traversal, XGBoost risk scoring, and Bayesian belief convergence.
+              </div>
+
+              <div className="space-y-2.5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Core Architectural Pillars (A · E · G · I · S)
+                </h3>
+
+                {/* Pillar A */}
+                <div className="flex gap-3 border border-border bg-card p-3.5 hover:border-navy/50 transition-colors shadow-xs">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-navy text-white font-black text-base">
+                    A
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-foreground">Autonomous</span>
+                      <span className="text-[10px] bg-navy/10 text-navy font-semibold px-1.5 py-0.2 rounded border border-navy/20">Closed-Loop Reasoning</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Operates in a closed-loop reasoning pipeline without requiring manual human-in-the-loop intervention for investigation steps.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pillar E */}
+                <div className="flex gap-3 border border-border bg-card p-3.5 hover:border-saffron/50 transition-colors shadow-xs">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-saffron text-navy font-black text-base">
+                    E
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-foreground">Entropy-guided</span>
+                      <span className="text-[10px] bg-saffron/20 text-amber-900 font-semibold px-1.5 py-0.2 rounded border border-saffron/30">Shannon Entropy H(X)</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Uses Shannon Entropy to quantify epistemic uncertainty and determine when to stop investigating.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pillar G */}
+                <div className="flex gap-3 border border-border bg-card p-3.5 hover:border-gov-green/50 transition-colors shadow-xs">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-gov-green text-white font-black text-base">
+                    G
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-foreground">Graph</span>
+                      <span className="text-[10px] bg-gov-green/10 text-gov-green font-semibold px-1.5 py-0.2 rounded border border-gov-green/20">NetworkX &amp; DFS Traversal</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Leverages NetworkX &amp; DFS graph traversal to track relational circular loops, conduit accounts, and shell company rings.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pillar I */}
+                <div className="flex gap-3 border border-border bg-card p-3.5 hover:border-indigo-500/50 transition-colors shadow-xs">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-indigo-700 text-white font-black text-base">
+                    I
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-foreground">Investigation</span>
+                      <span className="text-[10px] bg-indigo-50 text-indigo-700 font-semibold px-1.5 py-0.2 rounded border border-indigo-200">Adaptive Planner &amp; Bayes</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Autonomously selects evidence sources and updates Bayesian beliefs until a confident conclusion is reached.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pillar S */}
+                <div className="flex gap-3 border border-border bg-card p-3.5 hover:border-gov-red/50 transition-colors shadow-xs">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-gov-red text-white font-black text-base">
+                    S
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-foreground">System / Shield</span>
+                      <span className="text-[10px] bg-gov-red/10 text-gov-red font-semibold px-1.5 py-0.2 rounded border border-gov-red/20">FIU-IND &amp; PMLA Statutory Guard</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Enforces FIU-IND / PMLA statutory compliance and acts as an institutional shield protecting banks from financial crime.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-3 text-xs">
+              <span className="font-mono text-muted-foreground text-[11px]">
+                Statutory Reporting under Section 12, PMLA 2002 · FIU-IND Gateway
+              </span>
+              <button
+                onClick={() => setAegisInfoOpen(false)}
+                className="border border-border bg-background px-4 py-1.5 font-bold text-foreground hover:bg-muted transition-colors shadow-xs cursor-pointer"
+              >
+                Close
               </button>
             </div>
           </div>
