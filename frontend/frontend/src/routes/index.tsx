@@ -14,7 +14,7 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Transaction Flow Analysis | Financial Intelligence Unit" },
+      { title: "AEGIS | Financial Intelligence Unit — AML Forensics" },
       { name: "description", content: "Visualize money flow between accounts and identify key transaction patterns — FIU India." },
     ],
   }),
@@ -2882,13 +2882,13 @@ function Dashboard() {
             <Shield className="h-6 w-6" strokeWidth={1.5} />
           </div>
           <div className="leading-tight">
-            <div className="text-sm font-semibold uppercase tracking-wider text-saffron">Government of India</div>
-            <div className="text-lg font-bold text-navy">Financial Intelligence Unit</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-saffron">Government of India · FIU-IND</div>
+            <div className="text-xl font-black text-navy tracking-tight">AEGIS</div>
           </div>
           <div className="mx-5 h-9 w-px bg-border" />
           <div className="leading-tight">
-            <h1 className="text-lg font-semibold text-foreground">Transaction Flow Analysis</h1>
-            <p className="text-sm text-muted-foreground">Visualize money flow between accounts and identify key transaction patterns</p>
+            <h1 className="text-base font-semibold text-foreground">Transaction Flow Analysis</h1>
+            <p className="text-xs text-muted-foreground">Autonomous AML Forensics &amp; Financial Crime Intelligence</p>
           </div>
         </div>
 

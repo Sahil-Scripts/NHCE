@@ -1,0 +1,23 @@
+# ============================================================
+#  AEGIS — Autonomous Financial Crime Investigation System
+#  Root-level Requirements File
+#  Run: pip install -r requirements.txt
+# ============================================================
+
+# ── Machine Learning Core ────────────────────────────────────
+xgboost>=2.0.0              # Gradient boosted decision trees — Stage A risk scoring engine
+scikit-learn>=1.3.0         # Model evaluation, preprocessing, and metrics (ROC-AUC, precision-recall)
+scipy>=1.11.0               # Statistical distributions and signal processing
+
+# ── Data Processing ──────────────────────────────────────────
+numpy>=1.24.0               # Vectorized numerical computation (feature arrays, entropy, likelihoods)
+pandas>=2.0.0               # Structured transaction DataFrame processing and CSV parsing
+
+# ── Graph Intelligence ───────────────────────────────────────
+networkx>=3.1               # Directed graph topology — Stage D DFS cycle detection and conduit scoring
+
+# ── Model Persistence ────────────────────────────────────────
+joblib>=1.3.0               # Serializing and loading the trained XGBoost model (.pkl)
+
+# ── Visualization (optional, for diagnostics/training output) ─
+matplotlib>=3.7.0           # ROC curve plots, entropy convergence charts during model training
